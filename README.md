@@ -24,6 +24,12 @@ Created by **Ali Hadi Meselmani**
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/alihadimeselmani)
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AliHadi315)
 
+<br/>
+
+<a href="https://sightline-rho-khaki.vercel.app/app">
+  <img src="docs/screenshot-app.png" alt="The Sightline app page: a sample sign in the viewfinder, the text read back in large type on the right, and the big Describe the scene and Read the text buttons." width="100%">
+</a>
+
 </div>
 
 ---

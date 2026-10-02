@@ -6,6 +6,7 @@ __pycache__
 debug
 logs
 evals
+docs
 web/node_modules
 web/dist
 *.mp3
