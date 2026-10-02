@@ -16,6 +16,7 @@ One press describes what is in front of you, or reads any visible text aloud, wo
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![Accessibility](https://img.shields.io/badge/Accessibility-first-2E9E5B?style=flat-square)
 ![Free tier](https://img.shields.io/badge/Cost-%240-success?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 <br/>
 
@@ -256,3 +257,7 @@ evals/          expected.json + frames/
 
 `vision.py`, `speech.py`, and `memory.py` import nothing from OpenCV, pygame, or Gradio. That
 boundary is what lets both front ends share one core.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Copyright (c) 2026 Ali Hadi Meselmani.
