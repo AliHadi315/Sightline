@@ -1,22 +1,58 @@
-# Sightline
+<div align="center">
 
-**Live:** <https://sightline-rho-khaki.vercel.app>
+# 👁️ Sightline
+
+### Hear what your camera sees.
+
+**A webcam scene narrator for people with low vision.**
+One press describes what is in front of you, or reads any visible text aloud, word for word.
+
+[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Setup](#setup) · [Privacy](#privacy-by-design) · [Deploy](#deploy-to-vercel-free-hobby-plan)
+
+[![Live on Vercel](https://img.shields.io/badge/Live-sightline--rho--khaki.vercel.app-F5B82E?style=flat-square&logo=vercel&logoColor=black)](https://sightline-rho-khaki.vercel.app)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)
+![Gemini](https://img.shields.io/badge/Vision-Gemini%20Flash-4285F4?style=flat-square&logo=google&logoColor=white)
+![React](https://img.shields.io/badge/Web-React%20%2B%20Vite-61DAFB?style=flat-square&logo=react&logoColor=black)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Accessibility](https://img.shields.io/badge/Accessibility-first-2E9E5B?style=flat-square)
+![Free tier](https://img.shields.io/badge/Cost-%240-success?style=flat-square)
+
+<br/>
 
 Created by **Ali Hadi Meselmani**
-&nbsp;[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/alihadimeselmani)
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/alihadimeselmani)
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AliHadi315)
 
-Sightline tells you what is in front of your camera, out loud. It is built for someone with
-low vision who wants to know what is on the desk, what a sign says, or whether the room has
-changed, without having to see the screen.
+</div>
 
-Two modes:
+---
 
-- **Scene** – "A laptop is open in front of you, a mug to its right." Objects, layout, what is happening.
-- **Read** – reads any text in view aloud, word for word, top to bottom.
+Sightline is built for someone who cannot see the screen and wants to know what is on the desk,
+what a sign says, or whether the room has changed. Everything it finds is spoken aloud, in plain
+language, with directions like *"to your left"* and *"in front of you"*.
 
-It remembers the last three things it told you and only reports what changed, so it does not
-repeat itself every time you press the button.
+## Highlights
+
+| | |
+|---|---|
+| 🔎 **Scene mode** | "A laptop is open in front of you, a mug to its right." The most important thing first, then layout and what is happening. |
+| 📖 **Read mode** | Reads every word in view, top to bottom, exactly as written. Labels, letters, signs, screens. |
+| 🔁 **Only what changed** | Remembers the last three descriptions and reports what is new instead of repeating itself. |
+| ✋ **Manual capture only** | Nothing is sent until you press a key or a button. No motion detection, no timers, no background watching. |
+| 🛡️ **No guessing about people** | Never age, gender, race, or mood. A person is described only by presence and action. |
+| ⚡ **Fast and resilient** | Fastest free Gemini Flash model with automatic fallback, text shown the moment it arrives, speech streamed as it is generated. |
+| 💸 **Runs on free tiers** | Google AI Studio key, edge-tts speech, Vercel Hobby hosting. No billing account, ever. |
+
+## How it works
+
+1. **Point the camera.** The live view stays in your browser or on your desktop.
+2. **Press once.** `space` describes the scene, `r` reads the text. That single frame goes to the model and is forgotten.
+3. **Listen.** The answer appears in large type and is spoken automatically. `esc` stops the voice.
+
+Three front ends share one core (`vision.py`, `speech.py`, `memory.py`): a desktop app with a live
+camera window, a Gradio interface, and a React website backed by a stateless API that runs as a
+serverless function on Vercel.
 
 ## Privacy, by design
 
@@ -31,8 +67,8 @@ repeat itself every time you press the button.
 
 ## Setup
 
-Everything runs on free tiers: a free Google AI Studio key, free `edge-tts` speech, free Hugging Face
-Spaces hosting. No billing account is ever needed.
+Everything runs on free tiers: a free Google AI Studio key, free `edge-tts` speech, free Vercel
+hosting. No billing account is ever needed.
 
 1. **Get a free Gemini key.** Go to <https://aistudio.google.com/apikey>, sign in with a Google
    account, click *Create API key*. Do not enable Google Cloud Billing and do not use Vertex AI.
