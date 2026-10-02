@@ -1,0 +1,8 @@
+{
+  "_how_to_add": "Drop a JPEG/PNG into evals/frames/ and add an entry here: filename -> list of key objects that must appear in the scene description or object list. Matching is case-insensitive substring. Separate accepted synonyms with '|' (any one is enough). Keys starting with '_' are ignored.",
+  "desk.jpg": ["laptop|computer|screen|monitor", "mug|cup", "notebook|notepad|paper|book"],
+  "sign.jpg": ["sign|text|exit", "meeting room|room 2b|2b"],
+  "kitchen.jpg": ["apple|fruit", "bottle", "bowl"],
+  "door.jpg": ["door", "chair|seat"],
+  "table.jpg": ["book|atlas", "phone", "pen|pencil"]
+}

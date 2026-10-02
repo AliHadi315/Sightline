@@ -1,0 +1,38 @@
+{
+  "desk.jpg": {
+    "scene": {
+      "description": "A laptop with a blue screen sits open on a wooden desk directly in front of you. A white mug is to its right, and a lined notebook lies to your left.",
+      "objects": ["laptop", "mug", "notebook", "desk"],
+      "text_visible": null
+    },
+    "read": {
+      "description": "I don't see any readable text.",
+      "objects": ["laptop", "mug", "notebook"],
+      "text_visible": null
+    }
+  },
+  "sign.jpg": {
+    "scene": {
+      "description": "A white sign fills the view in front of you. At the top it says EXIT in red with an arrow pointing right, and below that it says Meeting Room 2B, please knock before entering, open 9 to 17.",
+      "objects": ["sign", "arrow", "text"],
+      "text_visible": "EXIT\nMeeting Room 2B\nPlease knock before entering\nOpen 9:00 - 17:00"
+    },
+    "read": {
+      "description": "EXIT. Meeting Room 2B. Please knock before entering. Open 9:00 - 17:00.",
+      "objects": ["sign"],
+      "text_visible": "EXIT\nMeeting Room 2B\nPlease knock before entering\nOpen 9:00 - 17:00"
+    }
+  },
+  "kitchen.jpg": {
+    "scene": {
+      "description": "A grey kitchen counter runs across in front of you. There is a red apple on your left, a green bottle in the middle, and a white bowl on your right.",
+      "objects": ["apple", "bottle", "bowl", "counter"],
+      "text_visible": null
+    },
+    "read": {
+      "description": "I don't see any readable text.",
+      "objects": ["apple", "bottle", "bowl"],
+      "text_visible": null
+    }
+  }
+}

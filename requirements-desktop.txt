@@ -1,0 +1,6 @@
+# Everything for running locally: desktop app (main.py), Gradio UI (app.py), local server (server.py), evals.
+-r requirements.txt
+gradio>=5.0,<6
+uvicorn>=0.29
+opencv-python>=4.9
+pygame-ce>=2.5
