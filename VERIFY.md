@@ -62,9 +62,11 @@ Expected: eight lines, each 1024×772. `samples/` contains `desk.jpg`, `sign.jpg
 python speech.py "Sightline speech test. A desk is in front of you."
 ```
 
-Expected: `wrote ...\debug\speech_test.mp3 (N bytes)` with N above 10000. Play the file to hear
-the sentence. If you see `speech FAILED`, edge-tts could not reach Microsoft; the app still
-works with text-only output. Try `pip install -U edge-tts`.
+Expected: `speech self-check ok`, then `wrote ...\debug\speech_test.mp3 (N bytes)` with N above
+10000. Play the file to hear the sentence. If edge-tts is down you will see one
+`[speech] edge-tts failed: ...` line and then `wrote ...\debug\speech_test.wav`, which is the
+Gemini TTS fallback. `speech FAILED` means both engines failed; the apps still show text, and the
+website falls back to the browser's own voice.
 
 ## 7. Gemini scene call
 

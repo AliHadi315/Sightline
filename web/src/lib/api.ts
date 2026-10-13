@@ -73,10 +73,11 @@ export async function describe(opts: {
   return r.json();
 }
 
-/** Fetch the spoken mp3 for a text; returns an object URL to play, or null if speech failed. */
-export async function speak(text: string): Promise<string | null> {
+/** Fetch spoken audio for a text (mp3 from edge-tts or WAV from Gemini TTS); object URL to play, or null if both failed. */
+export async function speak(text: string, key?: string): Promise<string | null> {
   const form = new FormData();
   form.append("text", text);
+  form.append("key", key ?? "");
   try {
     const r = await fetch("/api/speak", { method: "POST", body: form });
     if (!r.ok) return null;

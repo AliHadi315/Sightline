@@ -60,25 +60,52 @@ export default function Studio() {
 
   useEffect(() => { refreshStatus(); getSamples().then(setSamples).catch(() => setSamples([])); }, [refreshStatus]);
 
+  const [lastText, setLastText] = useState("");
+  const [voice, setVoice] = useState<"server" | "browser" | null>(null);
+
   const stopAudio = useCallback(() => {
     const a = audioRef.current;
     if (a) { a.pause(); a.currentTime = 0; }
+    window.speechSynthesis?.cancel();
     setPhase("idle");
   }, []);
 
-  const playText = useCallback(async (text: string) => {
+  // last resort: the browser's own voice, which needs no network and cannot go down
+  const speakInBrowser = useCallback((text: string): boolean => {
+    const synth = window.speechSynthesis;
+    if (!synth || typeof SpeechSynthesisUtterance === "undefined") return false;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.onend = () => setPhase("idle");
+    u.onerror = () => setPhase("idle");
     setPhase("speaking");
-    const url = await speak(text);
+    synth.speak(u);
+    return true;
+  }, []);
+
+  const playText = useCallback(async (text: string): Promise<"server" | "browser" | null> => {
+    setLastText(text);
+    setPhase("speaking");
+    const url = await speak(text, ownKey.trim() || undefined);
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudioUrl(url);
     if (url && audioRef.current) {
       audioRef.current.src = url;
       audioRef.current.play().catch(() => setPhase("idle"));
-    } else {
-      setPhase("idle");
+      setVoice("server");
+      return "server";
     }
-    return !!url;
-  }, [audioUrl]);
+    const ok = speakInBrowser(text);
+    setVoice(ok ? "browser" : null);
+    if (!ok) setPhase("idle");
+    return ok ? "browser" : null;
+  }, [audioUrl, ownKey, speakInBrowser]);
+
+  const playAgain = useCallback(() => {
+    if (voice === "server" && audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPhase("speaking"); }
+    else if (lastText) speakInBrowser(lastText);
+  }, [voice, lastText, speakInBrowser]);
 
   const captureBlob = useCallback(async (): Promise<Blob | null> => {
     if (uploaded) return uploaded.blob;
@@ -123,8 +150,9 @@ export default function Studio() {
         setHistory((h) => [{ time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), mode: r.source === "sample" ? `sample ${mode}` : mode, text: r.description }, ...h].slice(0, HISTORY_LIMIT));
       }
       if (r.description && r.source !== "repeat") {
-        const ok = await playText(r.description);
-        if (!ok) setResult({ ...r, message: r.message + " Spoken audio is unavailable right now, so read the text." });
+        const used = await playText(r.description);
+        if (used === "browser") setResult({ ...r, message: r.message + " Spoken with your device's own voice because the speech service is down." });
+        if (used === null) setResult({ ...r, message: r.message + " No voice is available right now, so read the text." });
       } else {
         setPhase("idle");
       }
@@ -262,7 +290,7 @@ export default function Studio() {
             )}
             <div className="mt-6 flex items-center gap-3">
               <audio ref={audioRef} onEnded={() => setPhase("idle")} onPause={() => phase === "speaking" && setPhase("idle")} className="hidden" />
-              <button className="btn btn-ghost px-5 py-3 text-base" disabled={!audioUrl} onClick={() => { audioRef.current?.play(); setPhase("speaking"); }}>
+              <button className="btn btn-ghost px-5 py-3 text-base" disabled={!lastText} onClick={playAgain}>
                 <Play className="h-4 w-4" /> Play again
               </button>
               {result?.latency_ms != null && <span className="text-sm text-muted">{(result.latency_ms / 1000).toFixed(1)} s</span>}

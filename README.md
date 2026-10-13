@@ -208,12 +208,18 @@ Flash models. Sightline is built to hit those limits gracefully:
 - If the description is empty or nearly identical to the previous one, speech is skipped and the app
   shows **No change**.
 
-## Speech: edge-tts is unofficial
+## Speech: a three-step chain
 
-Speech uses [`edge-tts`](https://github.com/rany2/edge-tts), an unofficial client for Microsoft
-Edge's Read Aloud service. Microsoft does not support it and may change or block it at any time.
-Every synthesis call is wrapped: if it fails, the description is still shown as text and the app
-says speech is unavailable. If speech stops working, first try `pip install -U edge-tts`.
+1. [`edge-tts`](https://github.com/rany2/edge-tts), an unofficial client for Microsoft Edge's Read
+   Aloud service. Best voice, streams as it synthesizes, but Microsoft does not support it and can
+   block it at any time (it did, with a 403, in October 2026).
+2. **Gemini TTS** (`GEMINI_TTS_MODEL` in `config.py`) on the same free AI Studio key, used when
+   edge-tts produces no audio. About four seconds per description, returned as WAV.
+3. On the website only, **the browser's own voice** (Web Speech API) when the server returns no
+   audio at all. Needs no network and cannot go down; the result note says when it was used.
+
+Every step is wrapped: the description is always shown as text, whatever the voices do. If
+edge-tts breaks, `pip install -U edge-tts` usually fixes it within days of Microsoft's change.
 
 ## Evals
 

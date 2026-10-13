@@ -97,7 +97,7 @@ python server.py                         # http://127.0.0.1:7860`}</Code>
             <li>A <strong>malformed response</strong> never crashes anything; it degrades to a best-effort description or “No change”.</li>
             <li>An empty or near-identical description skips speech and shows <strong>No change</strong>.</li>
           </ul>
-          <p><strong>Speech is unofficial.</strong> edge-tts talks to Microsoft Edge's read-aloud endpoint without Microsoft's blessing. It can break at any time; when it does, text still shows. Try <code>pip install -U edge-tts</code> first.</p>
+          <p><strong>Speech is a chain.</strong> edge-tts first (Microsoft's read-aloud voice through an unofficial client, which can break at any time), then Gemini TTS on the same free key, then on this website the browser's own voice. Text always shows, whatever the voices do.</p>
         </Section>
 
         <Section id="deploy" title="Deploy to Vercel (free Hobby plan)">
