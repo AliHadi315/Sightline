@@ -26,7 +26,7 @@ export default function Footer() {
           <ul className="space-y-2 text-muted">
             <li><Link className="hover:text-cream" to="/privacy">Privacy rules</Link></li>
             <li><Link className="hover:text-cream" to="/docs">Setup and docs</Link></li>
-            <li><a className="hover:text-cream" href="/gradio">Classic Gradio interface</a></li>
+            <li><a className="hover:text-cream" href="https://github.com/AliHadi315/Sightline" target="_blank" rel="noreferrer">Source on GitHub</a></li>
             <li><a className="hover:text-cream" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Get a free Gemini key</a></li>
           </ul>
         </div>

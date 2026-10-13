@@ -7,7 +7,7 @@
 **A webcam scene narrator for people with low vision.**
 One press describes what is in front of you, or reads any visible text aloud, word for word.
 
-[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Setup](#setup) · [Privacy](#privacy-by-design) · [Deploy](#deploy-to-vercel-free-hobby-plan)
+[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Setup](#setup) · [Privacy](#privacy-by-design)
 
 [![Live on Vercel](https://img.shields.io/badge/Live-sightline--rho--khaki.vercel.app-F5B82E?style=flat-square&logo=vercel&logoColor=black)](https://sightline-rho-khaki.vercel.app)
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -171,25 +171,6 @@ does something and never shows an error screen.
 The Gradio interface, being local, uses the key from `.env` (capped at 10 live descriptions per
 session) unless one is pasted under Settings.
 
-### Deploy to Vercel (free Hobby plan)
-
-The site is served statically from `web/dist` and the API runs as one Python serverless function,
-`api/index.py`. The API is stateless: the browser sends its own last three descriptions and its
-session count with each request, so any instance can answer. `vercel.json` wires it all up.
-
-1. Install the CLI and log in: `npm i -g vercel`, then `vercel login`.
-2. From the project root:
-
-   ```bash
-   vercel            # preview deployment, prints a URL
-   vercel --prod     # production deployment
-   ```
-
-3. That is all. No server secrets are needed: visitors use their own keys.
-
-Notes: the free plan allows 60 s per function call, which covers the slowest fallback chain. The
-Gradio UI is not deployed (it needs a long-running process); it stays available locally at `/gradio`. Hugging Face Spaces was the original target, but Gradio Spaces on
-the free CPU tier now require a paid plan.
 
 ## Free-tier limits and what the app does at them
 

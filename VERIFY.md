@@ -206,16 +206,6 @@ python -c "import server; from fastapi.testclient import TestClient as T; c=T(se
 Expected: `False True EXIT. Meeting Room 2B. Please knock before entering. Open 9:00 - 17:00.`
 (no key: not live; with a key: live; samples work either way).
 
-## 13c. Vercel deployment
-
-```bash
-vercel
-```
-
-Expected: the CLI builds `web/` remotely, bundles `api/index.py` with `requirements.txt`, and prints a
-preview URL. Opening it shows the landing page; `/app` plays samples without a key and describes the
-camera once a visitor pastes their own key. No environment variables are needed on Vercel.
-`<url>/api/status?own_key=1` returns JSON with `"live": true`.
 
 ## 14. Eval harness
 

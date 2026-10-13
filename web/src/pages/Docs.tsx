@@ -20,7 +20,6 @@ const toc = [
   ["website", "This website"],
   ["desktop", "Desktop app"],
   ["limits", "Free-tier limits"],
-  ["deploy", "Deploy to Hugging Face"],
   ["evals", "Evals and logs"],
 ];
 
@@ -62,7 +61,7 @@ pip install -r requirements-desktop.txt   # core + desktop app + Gradio + local 
         </Section>
 
         <Section id="website" title="This website">
-          <p>The site is a small React app in <code>web/</code>, served by <code>server.py</code> together with the JSON API and the classic Gradio interface at <code>/gradio</code>.</p>
+          <p>The site is a small React app in <code>web/</code>, served by <code>server.py</code> together with the JSON API.</p>
           <Code>{`cd web && npm install && npm run build   # once, builds web/dist
 python server.py                         # http://127.0.0.1:7860`}</Code>
           <p>
@@ -100,22 +99,6 @@ python server.py                         # http://127.0.0.1:7860`}</Code>
           <p><strong>Speech is a chain.</strong> edge-tts first (Microsoft's read-aloud voice through an unofficial client, which can break at any time), then Gemini TTS on the same free key, then on this website the browser's own voice. Text always shows, whatever the voices do.</p>
         </Section>
 
-        <Section id="deploy" title="Deploy to Vercel (free Hobby plan)">
-          <p>
-            The site is served statically and the API runs as one Python serverless function (<code>api/index.py</code>).
-            The API is stateless: the browser sends its own last three descriptions and session count with every request.
-          </p>
-          <ol className="list-decimal space-y-3 pl-6">
-            <li>Install the CLI and log in: <code>npm i -g vercel</code>, then <code>vercel login</code>.</li>
-            <li>From the project root, deploy. <code>vercel.json</code> already builds <code>web/</code> and routes <code>/api/*</code> to the function.<Code>{`vercel            # preview deployment
-vercel --prod     # production URL`}</Code></li>
-            <li>No server secrets are needed: visitors use their own keys. The site is live as soon as the deploy finishes.</li>
-          </ol>
-          <p>
-            Hugging Face Spaces used to be the free option for a Python app; Gradio Spaces now need a paid plan, so only the
-            Gradio interface at <code>/gradio</code> stays local.
-          </p>
-        </Section>
 
         <Section id="evals" title="Evals and logs">
           <Code>{`python run_evals.py --sleep 5`}</Code>
