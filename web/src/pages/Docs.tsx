@@ -56,7 +56,7 @@ export default function Docs() {
 venv\\Scripts\\activate        # Windows;  source venv/bin/activate on macOS / Linux
 pip install -r requirements-desktop.txt   # core + desktop app + Gradio + local server`}</Code></li>
             <li><strong>Configure.</strong> Copy <code>.env.example</code> to <code>.env</code> and paste your key after <code>GEMINI_API_KEY=</code>.</li>
-            <li><strong>Samples.</strong> <code>python make_samples.py</code> draws the sample and eval images.</li>
+            <li><strong>Samples.</strong> Three sample photos ship in <code>samples/</code> and five eval photos in <code>evals/frames/</code>.</li>
           </ol>
           <p>The Gemini model is a single constant, <code>MODEL</code> in <code>config.py</code>. Keep it on a current free-tier Flash model.</p>
         </Section>

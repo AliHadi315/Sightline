@@ -91,7 +91,6 @@ hosting. No billing account is ever needed.
    serverless function installs.
 
 3. **Configure.** Copy `.env.example` to `.env` and paste your key after `GEMINI_API_KEY=`.
-4. **Sample images.** `python make_samples.py` draws the three sample images and five eval frames.
 
 The Gemini model is a single constant, `MODEL` in `config.py` (currently `gemini-3.1-flash-lite`,
 the fastest free-tier vision model, about 2 s per frame when Google is not congested). If it is
@@ -250,9 +249,8 @@ server.py       local server: API + web/dist + the Gradio UI at /gradio on one p
 web/            React site (Vite + Tailwind); web/dist is the built output
 vercel.json     Vercel build and routing config
 run_evals.py    eval harness
-make_samples.py draws the sample and eval images
-samples/        3 sample images + cached.json for demo mode
-evals/          expected.json + frames/
+samples/        3 sample photos + cached.json for demo mode
+evals/          expected.json + frames/ (5 photos)
 ```
 
 `vision.py`, `speech.py`, and `memory.py` import nothing from OpenCV, pygame, or Gradio. That

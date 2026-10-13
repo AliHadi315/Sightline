@@ -50,10 +50,10 @@ real change detection, per-mode tracking, and the three-item limit.
 ## 5. Sample and eval images
 
 ```bash
-python make_samples.py
+python -c "from PIL import Image; import glob; [print(f, Image.open(f).size) for f in sorted(glob.glob('samples/*.jpg')+glob.glob('evals/frames/*.jpg'))]"
 ```
 
-Expected: five `wrote ...` lines. `samples/` contains `desk.jpg`, `sign.jpg`, `kitchen.jpg`;
+Expected: eight lines, each 1024×772. `samples/` contains `desk.jpg`, `sign.jpg`, `kitchen.jpg`;
 `evals/frames/` contains those plus `door.jpg` and `table.jpg`.
 
 ## 6. Speech (edge-tts, network required)
