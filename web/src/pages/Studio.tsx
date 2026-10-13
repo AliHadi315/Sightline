@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, Eye, BookOpenText, Square, Play, KeyRound, Images, Upload, Loader2 } from "lucide-react";
+import { Camera, CameraOff, Eye, BookOpenText, Square, Play, KeyRound, Images, Upload, Loader2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { describe, getSamples, getStatus, speak, type Described, type Mode, type Observation, type Sample, type Status } from "@/lib/api";
+import { describe, getSamples, getStatus, loadKey, saveKey, speak, type Described, type Mode, type Observation, type Sample, type Status } from "@/lib/api";
 
 type Phase = "idle" | "capturing" | "thinking" | "speaking";
 
@@ -15,21 +15,24 @@ export default function Studio() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const keyRef = useRef<HTMLInputElement>(null);
   const [camera, setCamera] = useState<"pending" | "on" | "off">("pending");
   const [uploaded, setUploaded] = useState<{ url: string; blob: Blob } | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [status, setStatus] = useState<Status | null>(null);
   const [samples, setSamples] = useState<Sample[]>([]);
   const [sample, setSample] = useState<string | null>(null);
-  const [ownKey, setOwnKey] = useState("");
-  const [count, setCount] = useState(0);                 // live descriptions used this session (the API is stateless)
+  const [ownKey, setOwnKey] = useState(loadKey);
   const [memory, setMemory] = useState<Observation[]>([]); // last few descriptions, sent back so the model reports only changes
   const [result, setResult] = useState<Described | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [lastText, setLastText] = useState("");
+  const [voice, setVoice] = useState<"server" | "browser" | null>(null);
   const busy = phase === "capturing" || phase === "thinking";
   const [elapsed, setElapsed] = useState(0);
+  const hasKey = ownKey.trim().length > 0;
 
   // elapsed-seconds display while waiting for the model (display only; never triggers a capture)
   useEffect(() => {
@@ -39,11 +42,11 @@ export default function Studio() {
     return () => window.clearInterval(id);
   }, [busy]);
 
-  const refreshStatus = useCallback(async (key = ownKey, n = count) => {
-    try { setStatus(await getStatus(!!key.trim(), n)); } catch { setStatus(null); }
-  }, [ownKey, count]);
+  const refreshStatus = useCallback(async (key = ownKey) => {
+    try { setStatus(await getStatus(!!key.trim())); } catch { setStatus(null); }
+  }, [ownKey]);
 
-  // camera
+  // camera: the live view stays in this browser; one frame is sent only when a button is pressed
   useEffect(() => {
     let stream: MediaStream | null = null;
     (async () => {
@@ -59,9 +62,6 @@ export default function Studio() {
   }, []);
 
   useEffect(() => { refreshStatus(); getSamples().then(setSamples).catch(() => setSamples([])); }, [refreshStatus]);
-
-  const [lastText, setLastText] = useState("");
-  const [voice, setVoice] = useState<"server" | "browser" | null>(null);
 
   const stopAudio = useCallback(() => {
     const a = audioRef.current;
@@ -123,6 +123,11 @@ export default function Studio() {
     if (busy) return;
     stopAudio();
     setError(null);
+    if (!sample && !hasKey) {
+      setError("Add your free Gemini key below to describe your own camera. The samples work without one.");
+      keyRef.current?.focus();
+      return;
+    }
     setPhase("capturing");
     try {
       let blob: Blob | undefined;
@@ -136,10 +141,8 @@ export default function Studio() {
         blob = b;
       }
       setPhase("thinking");
-      const r = await describe({ mode, blob, sample: sample ?? undefined, key: ownKey.trim() || undefined, count, history: memory });
+      const r = await describe({ mode, blob, sample: sample ?? undefined, key: ownKey.trim() || undefined, history: memory });
       setResult(r);
-      const nextCount = Math.max(count, r.count);
-      setCount(nextCount);
       if (r.source === "live") {
         setMemory((m) => {
           const kept = m.filter((o) => o.mode === mode).slice(-(MEMORY_LIMIT - 1));
@@ -156,12 +159,11 @@ export default function Studio() {
       } else {
         setPhase("idle");
       }
-      refreshStatus(ownKey, nextCount);
     } catch {
       setError("Could not reach the server. Check the connection and try again.");
       setPhase("idle");
     }
-  }, [busy, sample, captureBlob, camera, ownKey, count, memory, playText, refreshStatus, stopAudio]);
+  }, [busy, sample, hasKey, captureBlob, camera, ownKey, memory, playText, stopAudio]);
 
   // keyboard: space = scene, r = read, esc = stop
   useEffect(() => {
@@ -182,31 +184,61 @@ export default function Studio() {
     setUploaded({ url: URL.createObjectURL(f), blob: f });
   };
 
-  const demoReason = status?.demo_reason ?? null;
+  const onKeyChange = (value: string) => {
+    setOwnKey(value);
+    saveKey(value);
+    refreshStatus(value);
+  };
+
   const phaseLabel: Record<Phase, string> = { idle: "Ready", capturing: "Capturing", thinking: "Looking", speaking: "Speaking" };
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 md:py-12">
+      {/* before you start */}
+      <section aria-label="Before you start" className="mb-6 grid gap-4 rounded-2xl border border-cyan/30 bg-cyan-soft p-5 md:grid-cols-[auto_1fr] md:items-start">
+        <ShieldCheck className="h-8 w-8 text-cyan" aria-hidden />
+        <div className="space-y-3">
+          <p className="text-lg leading-relaxed">
+            <strong>This page uses your camera, and nothing is saved.</strong> The live view stays in your browser.
+            One photo is sent to Google's Gemini only when you press a button, and it is discarded right after.
+            No photos, descriptions, or keys are stored on our server.
+          </p>
+          <p className="text-lg leading-relaxed">
+            <strong>Bring your own free Gemini key.</strong> There is no shared key on this site. Get one in a minute at{" "}
+            <a className="text-cream underline" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">aistudio.google.com/apikey</a>{" "}
+            (no billing needed), paste it below, and it is sent only with your own requests. It stays in this tab and is forgotten when you close it.
+          </p>
+          <label className="block">
+            <span className="readout mb-1 block">Your Gemini API key</span>
+            <input
+              ref={keyRef}
+              type="password"
+              value={ownKey}
+              onChange={(e) => onKeyChange(e.target.value)}
+              placeholder="Paste your free Google AI Studio key"
+              autoComplete="off"
+              className="w-full max-w-xl rounded-xl bg-ink px-4 py-3 text-lg hairline placeholder:text-muted"
+            />
+          </label>
+        </div>
+      </section>
+
       {/* status */}
       <div
         role="status"
         className={cn(
           "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4 text-lg",
-          demoReason ? "border border-amber/40 bg-amber-soft" : "border border-signal/30 bg-signal-soft",
+          hasKey ? "border border-signal/30 bg-signal-soft" : "border border-amber/40 bg-amber-soft",
         )}
       >
         <span>
-          {demoReason ? (
-            <><strong>Demo mode.</strong> {demoReason} Samples still work, or add your own key in Settings.</>
-          ) : (
+          {hasKey ? (
             <><strong>Live.</strong> Press a button or use <kbd className="kbd">space</kbd> / <kbd className="kbd">r</kbd>.</>
+          ) : (
+            <><strong>Demo mode.</strong> Samples work now; add your key above to describe your own camera.</>
           )}
         </span>
-        {status && (
-          <span className="readout">
-            {count} / {status.session_cap} live · {result?.model ?? status.model}
-          </span>
-        )}
+        {status && <span className="readout">{hasKey ? "your key" : "no key"} · {result?.model ?? status.model}</span>}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
@@ -317,7 +349,7 @@ export default function Studio() {
         <div className="mb-4 flex items-center gap-3">
           <Images className="h-6 w-6 text-cyan" aria-hidden />
           <h2 className="font-display text-2xl font-bold">Try a sample</h2>
-          <span className="text-muted">Saved descriptions, no API call. Pick one, then press a button.</span>
+          <span className="text-muted">Saved descriptions, no key and no API call needed. Pick one, then press a button.</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           {samples.map((s) => (
@@ -334,26 +366,10 @@ export default function Studio() {
         </div>
       </section>
 
-      {/* settings */}
-      <section aria-label="Settings" className="mt-10 card p-6">
-        <div className="mb-3 flex items-center gap-3">
-          <KeyRound className="h-6 w-6 text-signal" aria-hidden />
-          <h2 className="font-display text-2xl font-bold">Use your own free key</h2>
-        </div>
-        <p className="mb-4 max-w-3xl text-muted">
-          The shared key has a daily limit. A free key from{" "}
-          <a className="text-cream underline" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">aistudio.google.com/apikey</a>{" "}
-          removes that limit for you. It is sent only with your requests and is never stored, not even in this browser.
-        </p>
-        <input
-          type="password"
-          value={ownKey}
-          onChange={(e) => { setOwnKey(e.target.value); refreshStatus(e.target.value, count); }}
-          placeholder="Paste your Google AI Studio key"
-          aria-label="Your own Google AI Studio key"
-          className="w-full max-w-xl rounded-xl bg-raised px-4 py-3 text-lg hairline placeholder:text-muted"
-        />
-      </section>
+      <p className="mt-10 flex items-center gap-2 text-muted">
+        <KeyRound className="h-4 w-4 text-signal" aria-hidden />
+        Your key is used only for your own requests and never leaves this tab except inside them.
+      </p>
     </div>
   );
 }

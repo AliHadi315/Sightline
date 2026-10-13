@@ -153,13 +153,13 @@ Open <http://127.0.0.1:7860>. Expected:
 6. On the *Try a sample* tab click the sign image, then **Read the text in this sample**: the saved
    text plays and a blue banner says `No API call made`.
 7. Press **Describe the scene** eleven times on the camera tab: after the tenth the banner turns
-   yellow with `Demo mode. This browser session has used its 10 live descriptions.` and a sample plays instead.
+   yellow with `Demo mode. This session has used its 10 live descriptions.` and a sample plays instead.
 
 ## 13. Web demo, demo mode (no key)
 
 Stop the server, temporarily blank `GEMINI_API_KEY` in `.env`, and run `python app.py` again.
 
-Expected: a yellow banner `Demo mode. No API key is configured on this server. Try the sample images ...`.
+Expected: a yellow banner `Demo mode. No API key is configured. Paste your own free Gemini key under Settings. ...`.
 **Describe the scene** on the camera tab plays a saved sample description. Paste a key on the
 *Settings* tab: the banner turns green with `Ready.` and the camera buttons make real calls.
 Restore `.env` afterwards.
@@ -179,26 +179,32 @@ python server.py
 
 Open <http://127.0.0.1:7860>. Expected:
 
-1. Landing page: amber "Open the app" button, headline "Point the camera. Hear what is there.", the
-   feature grid, the three steps, the privacy band, the FAQ. No errors in the browser console.
-2. `/app`: allow the camera, press **Describe the scene** (or `space`): the phase chip goes READY →
-   CAPTURING → LOOKING → SPEAKING, the description appears in large serif text and is spoken. The
-   status strip counts `1 / 10 live this session`.
-3. Press `esc` while it speaks: audio stops. **Play again** replays it.
-4. Click the sign sample, then **Read the text**: the saved text is read; the note says
-   `No API call made`.
-5. Deny or lack a camera: the viewfinder says "No camera. Upload a photo or pick a sample." and
+1. Landing page: cyan "Open the app" button, headline "Point. Press. Hear.", the desk photo with
+   detection boxes, the capability grid, the three steps, the privacy band, the FAQ. No errors in
+   the browser console.
+2. `/app`: a notice at the top says the page uses your camera, nothing is saved, and you need your
+   own free key, with a key field. The status strip reads `Demo mode`. Press **Describe the scene**
+   without a key: a red note asks for the key and the field is focused; nothing is sent.
+3. Paste a free AI Studio key: the status strip turns green, `Live.` Allow the camera, press
+   **Describe the scene** (or `space`): the HUD goes READY → CAPTURING → LOOKING → SPEAKING, the
+   description appears in large type and is spoken. Reload the page: the key is still there. Close
+   the tab and open the page again: the key is gone.
+4. Press `esc` while it speaks: audio stops. **Play again** replays it.
+5. Click the sign sample, then **Read the text**: the saved text is read; the note says
+   `No API call made`. This works with or without a key.
+6. Deny or lack a camera: the viewfinder says "No camera. Upload a photo or pick a sample." and
    **Upload a photo instead** works with any JPEG.
-6. <http://127.0.0.1:7860/gradio> shows the Gradio interface; <http://127.0.0.1:7860/api/docs> shows
+7. <http://127.0.0.1:7860/gradio> shows the Gradio interface; <http://127.0.0.1:7860/api/docs> shows
    the API reference; an unknown path such as `/anything` falls back to the site.
 
 API smoke test without a browser:
 
 ```bash
-python -c "import server; from fastapi.testclient import TestClient as T; c=T(server.api); print(c.get('/api/status').json()['live'], c.post('/api/describe', data={'mode':'read','sample':'sign.jpg'}).json()['description'])"
+python -c "import server; from fastapi.testclient import TestClient as T; c=T(server.api); print(c.get('/api/status').json()['live'], c.get('/api/status?own_key=1').json()['live'], c.post('/api/describe', data={'mode':'read','sample':'sign.jpg'}).json()['description'])"
 ```
 
-Expected: `True EXIT. Meeting Room 2B. Please knock before entering. Open 9:00 - 17:00.`
+Expected: `False True EXIT. Meeting Room 2B. Please knock before entering. Open 9:00 - 17:00.`
+(no key: not live; with a key: live; samples work either way).
 
 ## 13c. Vercel deployment
 
@@ -207,9 +213,9 @@ vercel
 ```
 
 Expected: the CLI builds `web/` remotely, bundles `api/index.py` with `requirements.txt`, and prints a
-preview URL. Opening it shows the landing page; `/app` works in demo mode until `GEMINI_API_KEY` is
-added under *Settings → Environment Variables* and the project is redeployed (`vercel --prod`).
-`<url>/api/status` returns JSON with `"live": true` once the key is set.
+preview URL. Opening it shows the landing page; `/app` plays samples without a key and describes the
+camera once a visitor pastes their own key. No environment variables are needed on Vercel.
+`<url>/api/status?own_key=1` returns JSON with `"live": true`.
 
 ## 14. Eval harness
 

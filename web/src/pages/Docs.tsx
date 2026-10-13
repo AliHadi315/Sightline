@@ -66,9 +66,9 @@ pip install -r requirements-desktop.txt   # core + desktop app + Gradio + local 
           <Code>{`cd web && npm install && npm run build   # once, builds web/dist
 python server.py                         # http://127.0.0.1:7860`}</Code>
           <p>
-            Keys: <code>GEMINI_API_KEY</code> from the environment, an optional per-request key from Settings, a cap of 10 live
-            descriptions per browser session, and a daily counter for the shared key. When live calls are unavailable the app
-            switches to demo mode with the three samples and says why.
+            Keys: every visitor pastes their own free Gemini key on the app page; the website has no shared key. The key stays
+            in the tab's session storage and travels only inside that visitor's requests. Without a key the three samples still
+            play their saved descriptions, and the page says a key is needed for the camera.
           </p>
           <p>Keyboard: <kbd className="kbd">space</kbd> describe the scene, <kbd className="kbd">r</kbd> read the text, <kbd className="kbd">esc</kbd> stop speaking.</p>
         </Section>
@@ -109,7 +109,7 @@ python server.py                         # http://127.0.0.1:7860`}</Code>
             <li>Install the CLI and log in: <code>npm i -g vercel</code>, then <code>vercel login</code>.</li>
             <li>From the project root, deploy. <code>vercel.json</code> already builds <code>web/</code> and routes <code>/api/*</code> to the function.<Code>{`vercel            # preview deployment
 vercel --prod     # production URL`}</Code></li>
-            <li>In the Vercel project settings add an environment variable <code>GEMINI_API_KEY</code> and redeploy. Without it the site runs in demo mode.</li>
+            <li>No server secrets are needed: visitors use their own keys. The site is live as soon as the deploy finishes.</li>
           </ol>
           <p>
             Hugging Face Spaces used to be the free option for a Python app; Gradio Spaces now need a paid plan, so only the

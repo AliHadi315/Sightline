@@ -18,9 +18,18 @@ import speech
 import vision
 from memory import Memory
 # Quota bookkeeping and the sample catalogue are shared with the JSON API.
-from api.index import CACHED, SAMPLE_CAPTIONS, SAMPLE_NAMES, _daily_bump, _shared_key_dead, _today, demo_reason
+from api.index import CACHED, SAMPLE_CAPTIONS, SAMPLE_NAMES
 
 HISTORY_LIMIT = 8
+
+
+def demo_reason(user_key: str, session_count: int) -> str | None:
+    """Why live calls are unavailable, or None. Locally the .env key may be used; a pasted key overrides it."""
+    if session_count >= config.SESSION_CAP:
+        return f"This session has used its {config.SESSION_CAP} live descriptions."
+    if user_key or config.GEMINI_API_KEY:
+        return None
+    return "No API key is configured. Paste your own free Gemini key under Settings."
 
 
 # ---- helpers -------------------------------------------------------------------------
@@ -78,11 +87,8 @@ def describe(mode: str, image, user_key, count, mem, history):
         try:
             result = vision.describe(vision.encode_jpeg(image), mode, mem.context(mode), api_key=user_key or None)
         except vision.QuotaExhausted as e:
-            if user_key:
-                msg = f"Your API key has used its daily free quota. {e}"
-                return msg, None, _banner("error", msg), count, mem, history, _history_md(history)
-            _shared_key_dead["today"] = _today()
-            return _sample_result(mode, SAMPLE_NAMES[0], "The shared free-tier key just hit its daily quota.", count, mem, history)
+            msg = f"The API key has used its daily free quota. {e}"
+            return msg, None, _banner("error", msg), count, mem, history, _history_md(history)
         except vision.RateLimited as e:
             return str(e), _speak(str(e)), _banner("error", f"{e} {_usage(count)}"), count, mem, history, _history_md(history)
         except vision.VisionError as e:
@@ -90,8 +96,6 @@ def describe(mode: str, image, user_key, count, mem, history):
             return msg, None, _banner("error", msg), count, mem, history, _history_md(history)
 
         count += 1
-        if not user_key:
-            _daily_bump()
         if mem.is_repeat(result, mode):
             msg = "No change since the last description."
             return msg, None, _banner("live", f"{msg} {_usage(count)}"), count, mem, history, _history_md(history)
@@ -192,9 +196,9 @@ button again on the same view gives "No change" instead of repeating itself.
 
 ### Free-tier limits
 This runs on Google AI Studio's free tier ({config.MODEL}), about 10 to 15 descriptions a minute and a
-few hundred a day, shared by everyone using this page. Each browser session gets {config.SESSION_CAP}
-live descriptions. When the shared quota runs out, the page switches to demo mode with three sample
-images, and a yellow banner says so. Paste your own free key under Settings to keep going.
+few hundred a day per key. This local interface uses the key in `.env`, capped at {config.SESSION_CAP}
+live descriptions per session; a key pasted under Settings overrides it. When no key is available the
+page switches to demo mode with three sample images, and a yellow banner says so.
 
 Speech comes from `edge-tts`, an unofficial client for Microsoft Edge's read-aloud voice. It may stop
 working without notice; when it does, the text is still shown.
@@ -235,11 +239,11 @@ with gr.Blocks(title="Sightline", css=CSS, theme=gr.themes.Soft(primary_hue="ind
 
         with gr.Tab("⚙️ Settings"):
             gr.Markdown(
-                '<div class="sl-steps">Sightline uses a shared free key with a daily limit. To use your own, get a free key at '
+                '<div class="sl-steps">This interface uses the key from <code>.env</code>. To use a different one, get a free key at '
                 '<a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> '
                 '(no billing needed) and paste it here. It is used only for your requests and is never stored.</div>')
-            key = gr.Textbox(type="password", label="Your own Google AI Studio key (optional)", placeholder="Paste your key here")
-            gr.Markdown(f"Model: `{config.MODEL}` · Voice: `{config.VOICE}` · Live descriptions per session: {config.SESSION_CAP}")
+            key = gr.Textbox(type="password", label="Your own Google AI Studio key", placeholder="Paste your key here")
+            gr.Markdown(f"Model: `{config.MODEL}` · Voice: `{config.VOICE}` · Live descriptions per session on the .env key: {config.SESSION_CAP}")
 
         with gr.Tab("ℹ️ About & privacy"):
             gr.Markdown(ABOUT)
