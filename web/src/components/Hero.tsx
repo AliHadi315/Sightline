@@ -41,7 +41,7 @@ export default function Hero() {
               Open the app <ArrowRight className="h-6 w-6" />
             </Link>
             <Link to="/docs" className="btn btn-ghost btn-lg">
-              <BookOpenText className="h-6 w-6" /> Run it yourself
+              <BookOpenText className="h-6 w-6" /> About the project
             </Link>
           </motion.div>
           <motion.dl {...appear(0.4)} className="grid grid-cols-2 gap-x-8 gap-y-4 border-t border-line pt-6 sm:grid-cols-4">

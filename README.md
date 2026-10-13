@@ -7,7 +7,7 @@
 **A webcam scene narrator for people with low vision.**
 One press describes what is in front of you, or reads any visible text aloud, word for word.
 
-[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Setup](#setup) · [Privacy](#privacy-by-design) · [Deploy](#deploy-to-vercel-free-hobby-plan)
+[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Setup](#setup) · [Privacy](#privacy-by-design)
 
 [![Live on Vercel](https://img.shields.io/badge/Live-sightline--rho--khaki.vercel.app-F5B82E?style=flat-square&logo=vercel&logoColor=black)](https://sightline-rho-khaki.vercel.app)
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -154,43 +154,23 @@ contrast, big buttons, and spoken output that plays automatically.
   Keyboard: `space` = describe scene, `r` = read text, `esc` = stop the audio.
   A *Recent descriptions* panel keeps the last few results so they can be re-read.
 - **Try a sample** tab: three sample images with saved descriptions, no API call, works without a camera or key.
-- **Settings** tab: paste your own free AI Studio key to bypass the shared key's limits.
+- **Settings** tab: paste a different free AI Studio key to use instead of the one in `.env`.
 - **About & privacy** tab: who it is for, how it works, the privacy rules, and the free-tier limits.
 
-Keys and limits, in order:
+**Every visitor brings their own key.** The website has no shared server key. The app page says
+so up front, with a note that it uses the camera and that nothing is saved: the live view stays in
+the browser, one frame is sent to Gemini only when a button is pressed and is discarded after, and no
+photo, description, or key is stored on the server. The visitor's key is kept in the tab's session
+storage (gone when the tab closes) and travels only inside their own requests. Because each key has
+its own free quota, there is no session cap or daily counter on the site.
 
-1. `GEMINI_API_KEY` from the environment (on Vercel, a project environment variable; never committed).
-2. An optional *your own key* field that overrides the shared key for that request only.
-3. A cap of 10 live calls per browser session, and a daily counter for the shared key in
-   `logs/daily_count.json` (200 per day, under the free-tier ceiling).
+**Demo mode.** Without a key, the three sample images in `samples/` play their cached descriptions
+from `samples/cached.json`, and the status strip says a key is needed for the camera. The page always
+does something and never shows an error screen.
 
-**Demo mode.** When there is no key, the shared key's daily quota is gone, or the session cap is
-reached, the demo switches to three sample images in `samples/` with cached descriptions from
-`samples/cached.json`, and a banner says why. You can also pick a sample at any time to try the
-demo without a camera. The page always does something and never shows an error screen.
+The Gradio interface, being local, uses the key from `.env` (capped at 10 live descriptions per
+session) unless one is pasted under Settings.
 
-### Deploy to Vercel (free Hobby plan)
-
-The site is served statically from `web/dist` and the API runs as one Python serverless function,
-`api/index.py`. The API is stateless: the browser sends its own last three descriptions and its
-session count with each request, so any instance can answer. `vercel.json` wires it all up.
-
-1. Install the CLI and log in: `npm i -g vercel`, then `vercel login`.
-2. From the project root:
-
-   ```bash
-   vercel            # preview deployment, prints a URL
-   vercel --prod     # production deployment
-   ```
-
-3. In the Vercel project, *Settings → Environment Variables*, add `GEMINI_API_KEY` and redeploy.
-   Without it the site runs in demo mode only.
-
-Notes: the free plan allows 60 s per function call, which covers the slowest fallback chain. The
-daily counter is per instance on serverless, so it is best-effort there; the per-session cap is
-what bounds usage. The Gradio UI is not deployed (it needs a long-running process); it stays
-available locally at `/gradio`. Hugging Face Spaces was the original target, but Gradio Spaces on
-the free CPU tier now require a paid plan.
 
 ## Free-tier limits and what the app does at them
 
@@ -213,8 +193,10 @@ Flash models. Sightline is built to hit those limits gracefully:
 1. [`edge-tts`](https://github.com/rany2/edge-tts), an unofficial client for Microsoft Edge's Read
    Aloud service. Best voice, streams as it synthesizes, but Microsoft does not support it and can
    block it at any time (it did, with a 403, in October 2026).
-2. **Gemini TTS** (`GEMINI_TTS_MODEL` in `config.py`) on the same free AI Studio key, used when
-   edge-tts produces no audio. About four seconds per description, returned as WAV.
+2. **Gemini TTS** (`GEMINI_TTS_MODELS` in `config.py`) on the same free AI Studio key, used when
+   edge-tts produces no audio. About four seconds per description, returned as WAV. The free tier
+   allows only about 10 TTS requests per day and 3 per minute per model, so two models are tried in
+   turn; treat this as a thin safety net, not a daily driver.
 3. On the website only, **the browser's own voice** (Web Speech API) when the server returns no
    audio at all. Needs no network and cannot go down; the result note says when it was used.
 

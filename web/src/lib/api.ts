@@ -3,11 +3,6 @@ export type Mode = "scene" | "read";
 export interface Status {
   model: string;
   voice: string;
-  session_cap: number;
-  count: number;
-  daily_used: number;
-  daily_cap: number;
-  shared_key: boolean;
   live: boolean;
   demo_reason: string | null;
 }
@@ -18,7 +13,6 @@ export interface Described {
   text_visible?: string | null;
   latency_ms?: number;
   model?: string;
-  count: number;
   mode: Mode;
   source: "live" | "sample" | "repeat" | "error";
   sample?: string;
@@ -41,8 +35,22 @@ export interface Observation {
   objects: string[];
 }
 
-export async function getStatus(ownKey: boolean, count: number): Promise<Status> {
-  const r = await fetch(`/api/status?own_key=${ownKey ? 1 : 0}&count=${count}`);
+const KEY_STORAGE = "sightline_gemini_key";
+
+/** The visitor's own key lives in session storage: it survives a reload and is gone when the tab closes. */
+export function loadKey(): string {
+  try { return sessionStorage.getItem(KEY_STORAGE) ?? ""; } catch { return ""; }
+}
+
+export function saveKey(key: string): void {
+  try {
+    if (key.trim()) sessionStorage.setItem(KEY_STORAGE, key.trim());
+    else sessionStorage.removeItem(KEY_STORAGE);
+  } catch { /* storage blocked: the key still works for this page load */ }
+}
+
+export async function getStatus(ownKey: boolean): Promise<Status> {
+  const r = await fetch(`/api/status?own_key=${ownKey ? 1 : 0}`);
   if (!r.ok) throw new Error(`status ${r.status}`);
   return r.json();
 }
@@ -53,19 +61,11 @@ export async function getSamples(): Promise<Sample[]> {
   return r.json();
 }
 
-export async function describe(opts: {
-  mode: Mode;
-  blob?: Blob;
-  sample?: string;
-  key?: string;
-  count: number;
-  history: Observation[];
-}): Promise<Described> {
+export async function describe(opts: { mode: Mode; blob?: Blob; sample?: string; key?: string; history: Observation[] }): Promise<Described> {
   const form = new FormData();
   form.append("mode", opts.mode);
   form.append("key", opts.key ?? "");
   form.append("sample", opts.sample ?? "");
-  form.append("count", String(opts.count));
   form.append("history", JSON.stringify(opts.history));
   if (opts.blob) form.append("image", opts.blob, "frame.jpg");
   const r = await fetch("/api/describe", { method: "POST", body: form });

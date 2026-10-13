@@ -19,7 +19,7 @@ const rules = [
   {
     icon: KeyRound,
     title: "Your key is yours",
-    text: "A key you paste in Settings is sent only with your own requests and is kept nowhere, not on the server and not in your browser's storage. Reload the page and it is gone.",
+    text: "There is no shared key on this site. The free Gemini key you paste on the app page is sent only inside your own requests, is never stored on the server, and lives only in this tab's session storage: it survives a reload and is gone when the tab closes.",
   },
 ];
 

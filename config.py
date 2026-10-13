@@ -35,7 +35,8 @@ REQUEST_TIMEOUT_MS = 15_000    # a hung request fails fast and moves on to the f
 VOICE = "en-US-AriaNeural"
 TTS_TIMEOUT_SECONDS = 20
 # Fallback when edge-tts is down: Gemini's own TTS on the same free key (raw PCM, wrapped as WAV).
-GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
+# The free tier allows only about 10 requests per day per TTS model, so two models are tried in order.
+GEMINI_TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"]
 GEMINI_TTS_VOICE = "Kore"
 
 # --- Frames -----------------------------------------------------------------
@@ -49,13 +50,12 @@ SIMILARITY_THRESHOLD = 0.85    # normalized text similarity above this = "No cha
 
 # --- Rate limiting ----------------------------------------------------------
 COOLDOWN_SECONDS = 3.0         # minimum gap between manual triggers
-SESSION_CAP = 10               # web demo: live calls per browser session
-DAILY_CAP = 200                # web demo: live calls per day on the shared key (free tier is ~250/day)
+SESSION_CAP = 10               # Gradio UI: live calls per session on the local .env key
+# The website has no shared key: every visitor supplies their own, so there is nothing to ration there.
 
 # --- Paths ------------------------------------------------------------------
 DEBUG_DIR = ROOT / "debug"
 DEBUG_FRAME = DEBUG_DIR / "last_frame.jpg"
 LOG_PATH = ROOT / "logs" / "log.jsonl"
-DAILY_COUNT_PATH = ROOT / "logs" / "daily_count.json"
 SAMPLES_DIR = ROOT / "samples"
 EVALS_DIR = ROOT / "evals"

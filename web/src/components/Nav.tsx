@@ -17,7 +17,7 @@ const links = [
   { to: "/#features", label: "Capabilities" },
   { to: "/#how", label: "How it works" },
   { to: "/privacy", label: "Privacy" },
-  { to: "/docs", label: "Docs" },
+  { to: "/docs", label: "About" },
 ];
 
 export default function Nav() {

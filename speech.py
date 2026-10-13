@@ -53,38 +53,43 @@ def _pcm_to_wav(pcm: bytes, rate: int) -> bytes:
     return buf.getvalue()
 
 
-def gemini_tts(text: str, api_key: str | None = None) -> bytes | None:
-    """Speak `text` with Gemini TTS. Returns WAV bytes, or None on any failure."""
-    key = api_key or config.GEMINI_API_KEY
+def gemini_tts(text: str, api_key: str | None = None, allow_env_key: bool = True) -> bytes | None:
+    """Speak `text` with Gemini TTS. Returns WAV bytes, or None on any failure.
+
+    allow_env_key=False (the website) means only the caller's own key is ever used.
+    """
+    key = api_key or (config.GEMINI_API_KEY if allow_env_key else None)
     if not key:
         return None
-    try:
-        from google.genai import types
+    from google.genai import types
 
-        import vision  # shares the per-key client cache; a throwaway Client is closed before the request completes
+    import vision  # shares the per-key client cache; a throwaway Client is closed before the request completes
 
-        response = vision._client(key).models.generate_content(
-            model=config.GEMINI_TTS_MODEL,
-            contents=text,
-            config=types.GenerateContentConfig(
-                response_modalities=["AUDIO"],
-                speech_config=types.SpeechConfig(voice_config=types.VoiceConfig(
-                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=config.GEMINI_TTS_VOICE))),
-                http_options=types.HttpOptions(timeout=config.TTS_TIMEOUT_SECONDS * 1000),
-            ),
-        )
-        part = response.candidates[0].content.parts[0].inline_data
-        rate = 24000
-        for field in part.mime_type.split(";"):
-            if field.strip().startswith("rate="):
-                rate = int(field.split("=", 1)[1])
-        return _pcm_to_wav(part.data, rate)
-    except Exception as e:  # noqa: BLE001 - quota, network, malformed response
-        print(f"[speech] gemini tts failed: {type(e).__name__}: {e}")
-        return None
+    for model in config.GEMINI_TTS_MODELS:  # each model has its own small daily quota
+        try:
+            response = vision._client(key).models.generate_content(
+                model=model,
+                # without the instruction, short texts make the model answer instead of reading
+                contents=f"Read the following aloud exactly as written, adding nothing:\n\n{text}",
+                config=types.GenerateContentConfig(
+                    response_modalities=["AUDIO"],
+                    speech_config=types.SpeechConfig(voice_config=types.VoiceConfig(
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=config.GEMINI_TTS_VOICE))),
+                    http_options=types.HttpOptions(timeout=config.TTS_TIMEOUT_SECONDS * 1000),
+                ),
+            )
+            part = response.candidates[0].content.parts[0].inline_data
+            rate = 24000
+            for field in part.mime_type.split(";"):
+                if field.strip().startswith("rate="):
+                    rate = int(field.split("=", 1)[1])
+            return _pcm_to_wav(part.data, rate)
+        except Exception as e:  # noqa: BLE001 - quota, network, malformed response
+            print(f"[speech] gemini tts ({model}) failed: {type(e).__name__}: {str(e)[:120]}")
+    return None
 
 
-def stream(text: str, api_key: str | None = None) -> tuple[str, Iterator[bytes]] | None:
+def stream(text: str, api_key: str | None = None, allow_env_key: bool = True) -> tuple[str, Iterator[bytes]] | None:
     """(mime type, audio chunks) for `text`, or None if every engine failed.
 
     edge-tts streams as it synthesizes; if it yields nothing, Gemini TTS is used instead.
@@ -99,7 +104,7 @@ def stream(text: str, api_key: str | None = None) -> tuple[str, Iterator[bytes]]
             yield first
             yield from edge
         return "audio/mpeg", rest()
-    wav = gemini_tts(text, api_key)
+    wav = gemini_tts(text, api_key, allow_env_key)
     return ("audio/wav", iter([wav])) if wav else None
 
 

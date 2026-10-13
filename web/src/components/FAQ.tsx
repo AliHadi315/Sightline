@@ -5,7 +5,7 @@ const faqs = [
   },
   {
     q: "Why does it say “demo mode”?",
-    a: "The shared free-tier key allows a few hundred descriptions a day for everyone. When that runs out, or when a browser session has used its ten live descriptions, the app plays saved descriptions of three sample images so it never goes silent. Paste your own free key in Settings to keep going.",
+    a: "There is no shared key on this site: describing your own camera needs your own free Gemini key, pasted at the top of the app page. Until you add one, the app plays saved descriptions of three sample images so it never goes silent. A free key takes a minute at aistudio.google.com/apikey and needs no billing.",
   },
   {
     q: "Does it describe people?",
