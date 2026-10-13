@@ -1,8 +1,8 @@
 {
   "desk.jpg": {
     "scene": {
-      "description": "A laptop with a blue screen sits open on a wooden desk directly in front of you. A white mug is to its right, and a lined notebook lies to your left.",
-      "objects": ["laptop", "mug", "notebook", "desk"],
+      "description": "A laptop with a blue screen sits open on a wooden desk directly in front of you. A white mug is to its right, a spiral notebook lies to your left, and there is a window with a plant behind on the left and a bookshelf on the right.",
+      "objects": ["laptop", "mug", "notebook", "desk", "plant", "bookshelf", "window"],
       "text_visible": null
     },
     "read": {

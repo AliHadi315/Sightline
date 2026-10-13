@@ -177,9 +177,16 @@ def describe(  # sync on purpose: runs in a worker thread, so the blocking Gemin
 
 
 @app.post("/api/speak")
-def speak(text: str = Form("")):
-    """Spoken version of a description as mp3, streamed as edge-tts produces it."""
+def speak(text: str = Form(""), key: str = Form("")):
+    """Spoken version of a description: mp3 streamed from edge-tts, or WAV from Gemini TTS when edge-tts is down.
+
+    503 means both engines failed; the site then falls back to the browser's own voice.
+    """
     text = (text or "").strip()[:MAX_SPEAK_CHARS]
     if not text:
         return JSONResponse({"error": "no text"}, status_code=400)
-    return StreamingResponse(speech.stream(text), media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
+    result = speech.stream(text, api_key=key.strip() or None)
+    if result is None:
+        return JSONResponse({"error": "speech unavailable"}, status_code=503)
+    mime, chunks = result
+    return StreamingResponse(chunks, media_type=mime, headers={"Cache-Control": "no-store", "X-Speech-Engine": "gemini" if mime == "audio/wav" else "edge-tts"})

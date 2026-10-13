@@ -11,16 +11,16 @@
   }
   body {
     background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(245, 184, 46, 0.10), transparent 60%),
-      radial-gradient(900px 500px at -10% 30%, rgba(94, 221, 208, 0.07), transparent 60%),
-      #0e0d0b;
+      radial-gradient(1100px 600px at 85% -10%, rgba(34, 227, 255, 0.10), transparent 60%),
+      radial-gradient(800px 500px at -10% 40%, rgba(92, 242, 138, 0.05), transparent 60%),
+      #07090c;
     min-height: 100vh;
   }
   ::selection {
-    background: rgba(245, 184, 46, 0.35);
+    background: rgba(34, 227, 255, 0.35);
   }
   :focus-visible {
-    outline: 3px solid #f5b82e;
+    outline: 3px solid #22e3ff;
     outline-offset: 3px;
     border-radius: 6px;
   }
@@ -34,41 +34,90 @@
 }
 
 @layer components {
+  /* dot grid behind sections */
+  .dotgrid {
+    background-image: radial-gradient(rgba(200, 224, 240, 0.09) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 100%);
+  }
   .grain::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.06;
+    opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: overlay;
   }
   .hairline {
-    border: 1px solid rgba(244, 239, 230, 0.10);
+    border: 1px solid rgba(200, 224, 240, 0.10);
   }
   .card {
     @apply relative rounded-2xl bg-surface hairline shadow-card;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-3 rounded-2xl font-bold transition-all duration-200 select-none;
+    @apply inline-flex items-center justify-center gap-3 rounded-xl font-bold transition-all duration-200 select-none;
     @apply disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
   }
   .btn-lg {
     @apply min-h-[76px] px-7 text-xl;
   }
-  .btn-amber {
-    @apply bg-amber text-ink hover:bg-[#ffc94a] shadow-glow;
+  .btn-cyan {
+    @apply bg-cyan text-ink hover:bg-[#5eeaff] shadow-glow;
   }
-  .btn-teal {
-    @apply bg-teal text-ink hover:bg-[#7ae8dd];
+  .btn-signal {
+    @apply bg-signal text-ink hover:bg-[#86f5a8];
   }
   .btn-ghost {
     @apply hairline text-cream hover:bg-raised;
   }
   .kbd {
-    @apply inline-block rounded-md border border-line bg-raised px-2 py-0.5 font-mono text-[0.8em] text-muted;
+    @apply inline-block rounded-md border border-line bg-raised px-2 py-0.5 font-mono text-[0.78em] text-muted;
   }
   .eyebrow {
-    @apply text-xs font-bold uppercase tracking-[0.22em] text-amber;
+    @apply font-mono text-[11px] font-bold uppercase tracking-[0.26em] text-cyan;
+  }
+  .readout {
+    @apply font-mono text-xs uppercase tracking-[0.14em] text-muted;
+  }
+
+  /* viewfinder corner brackets */
+  .brackets::before,
+  .brackets::after,
+  .brackets > .br::before,
+  .brackets > .br::after {
+    content: "";
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-color: #22e3ff;
+    border-style: solid;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .brackets::before { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+  .brackets::after { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+  .brackets > .br::before { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+  .brackets > .br::after { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+  /* horizontal scan line */
+  .scanline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(34, 227, 255, 0.9), transparent);
+    box-shadow: 0 0 18px 2px rgba(34, 227, 255, 0.45);
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  /* detection box label */
+  .det {
+    @apply absolute border-2 border-cyan;
+    box-shadow: 0 0 0 1px rgba(7, 9, 12, 0.6), inset 0 0 0 1px rgba(7, 9, 12, 0.4);
+  }
+  .det > span {
+    @apply absolute -top-[22px] left-[-2px] whitespace-nowrap bg-cyan px-1.5 py-0.5 font-mono text-[11px] font-bold text-ink;
   }
 }

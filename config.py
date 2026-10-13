@@ -34,6 +34,9 @@ REQUEST_TIMEOUT_MS = 15_000    # a hung request fails fast and moves on to the f
 # --- Speech (edge-tts, unofficial Microsoft endpoint) ------------------------
 VOICE = "en-US-AriaNeural"
 TTS_TIMEOUT_SECONDS = 20
+# Fallback when edge-tts is down: Gemini's own TTS on the same free key (raw PCM, wrapped as WAV).
+GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
+GEMINI_TTS_VOICE = "Kore"
 
 # --- Frames -----------------------------------------------------------------
 MAX_EDGE = 768                 # longest edge after downscale

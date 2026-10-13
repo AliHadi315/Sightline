@@ -27,14 +27,14 @@ export default function FAQ() {
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_1.6fr]">
         <div>
           <p className="eyebrow mb-3">Questions</p>
-          <h2 className="font-display text-display-lg font-medium">Straight answers.</h2>
+          <h2 className="font-display text-display-lg font-bold">Straight answers.</h2>
         </div>
         <div className="divide-y divide-line border-y border-line">
           {faqs.map((f) => (
             <details key={f.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-display text-2xl font-medium marker:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-display text-2xl font-bold marker:hidden">
                 {f.q}
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full hairline text-amber transition-transform group-open:rotate-45">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full hairline text-cyan transition-transform group-open:rotate-45">
                   +
                 </span>
               </summary>

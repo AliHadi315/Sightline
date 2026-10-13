@@ -50,10 +50,10 @@ real change detection, per-mode tracking, and the three-item limit.
 ## 5. Sample and eval images
 
 ```bash
-python make_samples.py
+python -c "from PIL import Image; import glob; [print(f, Image.open(f).size) for f in sorted(glob.glob('samples/*.jpg')+glob.glob('evals/frames/*.jpg'))]"
 ```
 
-Expected: five `wrote ...` lines. `samples/` contains `desk.jpg`, `sign.jpg`, `kitchen.jpg`;
+Expected: eight lines, each 1024×772. `samples/` contains `desk.jpg`, `sign.jpg`, `kitchen.jpg`;
 `evals/frames/` contains those plus `door.jpg` and `table.jpg`.
 
 ## 6. Speech (edge-tts, network required)
@@ -62,9 +62,11 @@ Expected: five `wrote ...` lines. `samples/` contains `desk.jpg`, `sign.jpg`, `k
 python speech.py "Sightline speech test. A desk is in front of you."
 ```
 
-Expected: `wrote ...\debug\speech_test.mp3 (N bytes)` with N above 10000. Play the file to hear
-the sentence. If you see `speech FAILED`, edge-tts could not reach Microsoft; the app still
-works with text-only output. Try `pip install -U edge-tts`.
+Expected: `speech self-check ok`, then `wrote ...\debug\speech_test.mp3 (N bytes)` with N above
+10000. Play the file to hear the sentence. If edge-tts is down you will see one
+`[speech] edge-tts failed: ...` line and then `wrote ...\debug\speech_test.wav`, which is the
+Gemini TTS fallback. `speech FAILED` means both engines failed; the apps still show text, and the
+website falls back to the browser's own voice.
 
 ## 7. Gemini scene call
 

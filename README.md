@@ -28,7 +28,7 @@ Created by **Ali Hadi Meselmani**
 <br/>
 
 <a href="https://sightline-rho-khaki.vercel.app/app">
-  <img src="docs/screenshot-app.png" alt="The Sightline app page: a sample sign in the viewfinder, the text read back in large type on the right, and the big Describe the scene and Read the text buttons." width="100%">
+  <img src="docs/screenshot-landing.png" alt="The Sightline landing page: the headline Point. Press. Hear. beside a viewfinder showing a real desk photo with detection boxes over the laptop, mug and notebook, and the spoken description on the right." width="100%">
 </a>
 
 </div>
@@ -91,7 +91,6 @@ hosting. No billing account is ever needed.
    serverless function installs.
 
 3. **Configure.** Copy `.env.example` to `.env` and paste your key after `GEMINI_API_KEY=`.
-4. **Sample images.** `python make_samples.py` draws the three sample images and five eval frames.
 
 The Gemini model is a single constant, `MODEL` in `config.py` (currently `gemini-3.1-flash-lite`,
 the fastest free-tier vision model, about 2 s per frame when Google is not congested). If it is
@@ -209,12 +208,18 @@ Flash models. Sightline is built to hit those limits gracefully:
 - If the description is empty or nearly identical to the previous one, speech is skipped and the app
   shows **No change**.
 
-## Speech: edge-tts is unofficial
+## Speech: a three-step chain
 
-Speech uses [`edge-tts`](https://github.com/rany2/edge-tts), an unofficial client for Microsoft
-Edge's Read Aloud service. Microsoft does not support it and may change or block it at any time.
-Every synthesis call is wrapped: if it fails, the description is still shown as text and the app
-says speech is unavailable. If speech stops working, first try `pip install -U edge-tts`.
+1. [`edge-tts`](https://github.com/rany2/edge-tts), an unofficial client for Microsoft Edge's Read
+   Aloud service. Best voice, streams as it synthesizes, but Microsoft does not support it and can
+   block it at any time (it did, with a 403, in October 2026).
+2. **Gemini TTS** (`GEMINI_TTS_MODEL` in `config.py`) on the same free AI Studio key, used when
+   edge-tts produces no audio. About four seconds per description, returned as WAV.
+3. On the website only, **the browser's own voice** (Web Speech API) when the server returns no
+   audio at all. Needs no network and cannot go down; the result note says when it was used.
+
+Every step is wrapped: the description is always shown as text, whatever the voices do. If
+edge-tts breaks, `pip install -U edge-tts` usually fixes it within days of Microsoft's change.
 
 ## Evals
 
@@ -250,9 +255,8 @@ server.py       local server: API + web/dist + the Gradio UI at /gradio on one p
 web/            React site (Vite + Tailwind); web/dist is the built output
 vercel.json     Vercel build and routing config
 run_evals.py    eval harness
-make_samples.py draws the sample and eval images
-samples/        3 sample images + cached.json for demo mode
-evals/          expected.json + frames/
+samples/        3 sample photos + cached.json for demo mode
+evals/          expected.json + frames/ (5 photos)
 ```
 
 `vision.py`, `speech.py`, and `memory.py` import nothing from OpenCV, pygame, or Gradio. That
