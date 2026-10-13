@@ -28,7 +28,7 @@ Created by **Ali Hadi Meselmani**
 <br/>
 
 <a href="https://sightline-rho-khaki.vercel.app/app">
-  <img src="docs/screenshot-landing.png" alt="The Sightline landing page: the headline Point. Press. Hear. beside a viewfinder showing a real desk photo with detection boxes over the laptop, mug and notebook, and the spoken description on the right." width="100%">
+  <img src="docs/screenshot-app.png" alt="The Sightline app page: a notice that the page uses your camera and nothing is saved, the field for your own Gemini key, a viewfinder with corner brackets showing a sample sign, the sign's text read back in large type, and the Describe the scene and Read the text buttons." width="100%">
 </a>
 
 </div>
