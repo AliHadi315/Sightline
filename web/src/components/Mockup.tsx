@@ -1,9 +1,12 @@
 import { cn } from "@/lib/utils";
+import desk from "@/assets/desk.jpg";
 
-const boxes = [
-  { label: "laptop 0.97", left: "33%", top: "26%", width: "34%", height: "44%", delay: "0.9s" },
-  { label: "mug 0.91", left: "71%", top: "50%", width: "12%", height: "20%", delay: "1.25s" },
-  { label: "notebook 0.88", left: "8%", top: "58%", width: "24%", height: "20%", delay: "1.55s" },
+// box positions are percentages of the desk photo (1024×772)
+type Box = { label: string; left: string; top: string; width: string; height: string; delay: string; right?: boolean };
+const boxes: Box[] = [
+  { label: "laptop 0.97", left: "26%", top: "23%", width: "51%", height: "52%", delay: "0.9s" },
+  { label: "mug 0.91", left: "80%", top: "46%", width: "17%", height: "20%", delay: "1.25s", right: true },
+  { label: "notebook 0.88", left: "0.5%", top: "58%", width: "25%", height: "20%", delay: "1.55s" },
 ];
 
 /** A CSS-drawn picture of the app detecting a desk scene: viewfinder, scan line, bounding boxes, spoken result. */
@@ -18,22 +21,15 @@ export default function Mockup({ className }: { className?: string }) {
         <div className="brackets relative aspect-[4/3] overflow-hidden rounded-xl bg-[#0a0e13]">
           <span className="br" />
           <span className="scanline animate-scan" />
-          <div className="absolute inset-0 dotgrid opacity-60" />
-          {/* desk scene */}
-          <div className="absolute inset-x-0 bottom-0 h-[38%] bg-[#4a3826]" />
-          <div className="absolute left-[34%] top-[28%] h-[38%] w-[32%] rounded-md bg-[#1d2228] shadow-lg">
-            <div className="m-[6%] h-[80%] rounded-sm bg-[#2f6fcf]" />
-          </div>
-          <div className="absolute left-[72%] top-[52%] h-[16%] w-[10%] rounded-sm bg-[#e3e0d6]" />
-          <div className="absolute left-[10%] top-[60%] h-[16%] w-[20%] rounded-sm bg-[#e9e1c4]" />
+          <img src={desk} alt="" className="absolute inset-0 h-full w-full object-cover" />
           {/* detections */}
           {boxes.map((b) => (
             <div key={b.label} className="det animate-box-in" style={{ left: b.left, top: b.top, width: b.width, height: b.height, animationDelay: b.delay }}>
-              <span>{b.label}</span>
+              <span style={b.right ? { left: "auto", right: -2 } : undefined}>{b.label}</span>
             </div>
           ))}
           {/* HUD */}
-          <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-md bg-ink/85 px-3 py-1 font-mono text-[11px] font-bold tracking-[0.14em] text-cream">
+          <div className="absolute right-4 top-4 z-10 flex items-center gap-2 rounded-md bg-ink/85 px-3 py-1 font-mono text-[11px] font-bold tracking-[0.14em] text-cream">
             <span className="relative grid h-2.5 w-2.5 place-items-center">
               <span className="absolute h-2.5 w-2.5 rounded-full bg-cyan animate-pulse_ring" />
               <span className="h-2 w-2 rounded-full bg-cyan" />
