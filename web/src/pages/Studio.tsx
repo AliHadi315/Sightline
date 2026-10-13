@@ -164,7 +164,7 @@ export default function Studio() {
         role="status"
         className={cn(
           "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4 text-lg",
-          demoReason ? "border border-amber/40 bg-amber-soft" : "border border-teal/30 bg-teal-soft",
+          demoReason ? "border border-amber/40 bg-amber-soft" : "border border-signal/30 bg-signal-soft",
         )}
       >
         <span>
@@ -175,8 +175,8 @@ export default function Studio() {
           )}
         </span>
         {status && (
-          <span className="text-muted">
-            {count} / {status.session_cap} live this session · {result?.model ?? status.model}
+          <span className="readout">
+            {count} / {status.session_cap} live · {result?.model ?? status.model}
           </span>
         )}
       </div>
@@ -184,7 +184,9 @@ export default function Studio() {
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         {/* left: viewfinder + buttons */}
         <section aria-label="Camera" className="space-y-4">
-          <div className="card relative aspect-[4/3] overflow-hidden bg-[#121110]">
+          <div className="card brackets relative aspect-[4/3] overflow-hidden bg-[#0a0e13]">
+            <span className="br" />
+            {busy && <span className="scanline animate-scan" aria-hidden />}
             <video ref={videoRef} playsInline muted className={cn("h-full w-full object-cover", (camera !== "on" || uploaded || sample) && "hidden")} />
             {uploaded && !sample && <img src={uploaded.url} alt="Uploaded photo" className="h-full w-full object-contain" />}
             {sample && <img src={samples.find((s) => s.name === sample)?.image} alt={`Sample: ${sample}`} className="h-full w-full object-contain" />}
@@ -197,14 +199,17 @@ export default function Studio() {
                 )}
               </div>
             )}
-            {/* phase chip */}
-            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-ink/85 px-4 py-1.5 text-sm font-bold">
+            {/* HUD readout */}
+            <div className="absolute left-5 top-5 z-10 flex items-center gap-2 rounded-md bg-ink/85 px-3 py-1.5 font-mono text-xs font-bold tracking-[0.14em]">
               <span className="relative grid h-3 w-3 place-items-center">
-                {phase !== "idle" && <span className="absolute h-3 w-3 rounded-full bg-amber animate-pulse_ring" />}
-                <span className={cn("h-2.5 w-2.5 rounded-full", phase === "idle" ? "bg-teal" : "bg-amber")} />
+                {phase !== "idle" && <span className="absolute h-3 w-3 rounded-full bg-cyan animate-pulse_ring" />}
+                <span className={cn("h-2.5 w-2.5 rounded-full", phase === "idle" ? "bg-signal" : "bg-cyan")} />
               </span>
               {phaseLabel[phase].toUpperCase()}
-              {busy && <span className="font-normal text-muted">{elapsed.toFixed(1)} s</span>}
+              {busy && <span className="font-normal text-muted">{elapsed.toFixed(1).padStart(4, "0")}s</span>}
+            </div>
+            <div className="readout absolute bottom-5 left-5 z-10 rounded-md bg-ink/85 px-3 py-1" aria-hidden>
+              {sample ? "sample" : uploaded ? "upload" : camera === "on" ? "camera" : "no input"} · {result?.objects?.length ?? 0} objects
             </div>
             {(uploaded || sample) && (
               <button
@@ -217,11 +222,11 @@ export default function Studio() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-2">
-            <button className="btn btn-amber btn-lg" onClick={() => run("scene")} disabled={busy} aria-keyshortcuts="Space">
+            <button className="btn btn-cyan btn-lg" onClick={() => run("scene")} disabled={busy} aria-keyshortcuts="Space">
               {busy ? <Loader2 className="h-7 w-7 animate-spin" /> : <Eye className="h-7 w-7" />} Describe the scene
               <kbd className="kbd ml-1 text-ink/70 border-ink/20 bg-ink/10">space</kbd>
             </button>
-            <button className="btn btn-teal btn-lg" onClick={() => run("read")} disabled={busy} aria-keyshortcuts="r">
+            <button className="btn btn-signal btn-lg" onClick={() => run("read")} disabled={busy} aria-keyshortcuts="r">
               <BookOpenText className="h-7 w-7" /> Read the text
               <kbd className="kbd ml-1 text-ink/70 border-ink/20 bg-ink/10">r</kbd>
             </button>
@@ -241,7 +246,7 @@ export default function Studio() {
         <section aria-label="Result" className="space-y-4">
           <div className="card min-h-[280px] p-7">
             <div className="eyebrow mb-3">What Sightline sees</div>
-            <p aria-live="polite" className="font-display text-[1.7rem] leading-snug text-cream md:text-[2rem]">
+            <p aria-live="polite" className="font-display text-[1.7rem] font-semibold leading-snug text-cream md:text-[2rem]">
               {result?.description || (error ? "" : "Press a button to hear what is in front of you.")}
             </p>
             {error && <p role="alert" className="mt-3 rounded-xl bg-rose-soft px-4 py-3 text-lg text-rose">{error}</p>}
@@ -250,8 +255,8 @@ export default function Studio() {
             )}
             {result?.objects && result.objects.length > 0 && (
               <ul className="mt-4 flex flex-wrap gap-2" aria-label="Objects">
-                {result.objects.map((o) => (
-                  <li key={o} className="rounded-full hairline px-3 py-1 text-sm text-muted">{o}</li>
+                {result.objects.map((o, i) => (
+                  <li key={o} className="animate-box-in rounded-md border border-cyan/40 bg-cyan-soft px-2.5 py-1 font-mono text-xs text-cyan" style={{ animationDelay: `${i * 70}ms` }}>{o}</li>
                 ))}
               </ul>
             )}
@@ -265,11 +270,11 @@ export default function Studio() {
           </div>
 
           <details className="card p-6" open={history.length > 0}>
-            <summary className="cursor-pointer font-display text-xl font-medium">Recent descriptions</summary>
+            <summary className="cursor-pointer font-display text-xl font-bold">Recent descriptions</summary>
             <ol className="mt-4 space-y-3">
               {history.length === 0 && <li className="text-muted">Nothing yet.</li>}
               {history.map((h, i) => (
-                <li key={i} className="border-l-2 border-amber/50 pl-4">
+                <li key={i} className="border-l-2 border-cyan/50 pl-4">
                   <div className="text-xs uppercase tracking-widest text-muted">{h.time} · {h.mode}</div>
                   <div className="text-lg">{h.text}</div>
                 </li>
@@ -282,8 +287,8 @@ export default function Studio() {
       {/* samples */}
       <section aria-label="Samples" className="mt-10">
         <div className="mb-4 flex items-center gap-3">
-          <Images className="h-6 w-6 text-amber" aria-hidden />
-          <h2 className="font-display text-2xl font-medium">Try a sample</h2>
+          <Images className="h-6 w-6 text-cyan" aria-hidden />
+          <h2 className="font-display text-2xl font-bold">Try a sample</h2>
           <span className="text-muted">Saved descriptions, no API call. Pick one, then press a button.</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -292,7 +297,7 @@ export default function Studio() {
               key={s.name}
               onClick={() => { setSample(sample === s.name ? null : s.name); setUploaded(null); }}
               aria-pressed={sample === s.name}
-              className={cn("card overflow-hidden text-left transition-transform hover:-translate-y-0.5", sample === s.name && "ring-4 ring-amber")}
+              className={cn("card overflow-hidden text-left transition-transform hover:-translate-y-0.5", sample === s.name && "ring-4 ring-cyan")}
             >
               <img src={s.image} alt={s.caption} className="aspect-[4/3] w-full object-cover" />
               <div className="p-4 text-lg">{s.caption}</div>
@@ -304,8 +309,8 @@ export default function Studio() {
       {/* settings */}
       <section aria-label="Settings" className="mt-10 card p-6">
         <div className="mb-3 flex items-center gap-3">
-          <KeyRound className="h-6 w-6 text-teal" aria-hidden />
-          <h2 className="font-display text-2xl font-medium">Use your own free key</h2>
+          <KeyRound className="h-6 w-6 text-signal" aria-hidden />
+          <h2 className="font-display text-2xl font-bold">Use your own free key</h2>
         </div>
         <p className="mb-4 max-w-3xl text-muted">
           The shared key has a daily limit. A free key from{" "}

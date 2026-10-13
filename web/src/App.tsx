@@ -22,7 +22,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <div className="relative min-h-screen flex flex-col">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 btn btn-amber px-4 py-2">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 btn btn-cyan px-4 py-2">
         Skip to content
       </a>
       <ScrollToTop />

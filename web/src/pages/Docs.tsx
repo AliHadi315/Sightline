@@ -9,7 +9,7 @@ function Code({ children }: { children: string }) {
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24 space-y-4">
-      <h2 className="font-display text-3xl font-medium">{title}</h2>
+      <h2 className="font-display text-3xl font-bold">{title}</h2>
       {children}
     </section>
   );
@@ -38,7 +38,7 @@ export default function Docs() {
 
       <div className="space-y-14 text-lg leading-relaxed text-muted [&_strong]:text-cream">
         <div>
-          <h1 className="font-display text-display-lg font-medium text-cream">Run Sightline yourself.</h1>
+          <h1 className="font-display text-display-lg font-bold text-cream">Run Sightline yourself.</h1>
           <p className="mt-4 max-w-2xl text-xl">
             Everything is free: a Google AI Studio key, Microsoft's read-aloud voice through edge-tts, and Hugging Face
             Spaces for hosting. No billing account is ever needed.

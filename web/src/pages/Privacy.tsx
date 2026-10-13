@@ -27,7 +27,7 @@ export default function Privacy() {
   return (
     <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 md:py-24">
       <p className="eyebrow mb-3">Privacy rules</p>
-      <h1 className="font-display text-display-lg font-medium">Non-negotiable, in both front ends.</h1>
+      <h1 className="font-display text-display-lg font-bold">Non-negotiable, in both front ends.</h1>
       <p className="mt-4 max-w-2xl text-xl text-muted">
         Sightline looks at the world on someone's behalf. That trust is only worth something if the tool never keeps,
         guesses, or watches more than it was asked to.
@@ -35,16 +35,16 @@ export default function Privacy() {
       <ol className="mt-12 space-y-5">
         {rules.map((r) => (
           <li key={r.title} className="card grid gap-5 p-7 md:grid-cols-[auto_1fr]">
-            <r.icon className="h-10 w-10 text-amber" aria-hidden />
+            <r.icon className="h-10 w-10 text-cyan" aria-hidden />
             <div>
-              <h2 className="font-display text-2xl font-medium">{r.title}</h2>
+              <h2 className="font-display text-2xl font-bold">{r.title}</h2>
               <p className="mt-2 text-lg leading-relaxed text-muted">{r.text}</p>
             </div>
           </li>
         ))}
       </ol>
       <div className="mt-12 rounded-2xl bg-surface p-7 hairline">
-        <h2 className="font-display text-2xl font-medium">What does leave your device</h2>
+        <h2 className="font-display text-2xl font-bold">What does leave your device</h2>
         <ul className="mt-3 list-disc space-y-2 pl-6 text-lg text-muted">
           <li>The single frame you captured, sent to Google's Gemini API through the server, for that one request.</li>
           <li>The description text, sent to Microsoft's Edge read-aloud service through the unofficial edge-tts client to make the audio.</li>

@@ -7,7 +7,7 @@ const steps = [
   {
     n: "02",
     title: "Press once",
-    text: "Space, or the big amber button, describes the scene. R, or the teal button, reads the text. That one frame goes to the model and is forgotten after.",
+    text: "Space, or the big cyan button, describes the scene. R, or the green button, reads the text. That one frame goes to the model and is forgotten after.",
     keys: ["space", "r"],
   },
   {
@@ -25,7 +25,7 @@ export default function HowItWorks() {
         <div className="mb-12 grid gap-6 md:grid-cols-[1fr_1.2fr] md:items-end">
           <div>
             <p className="eyebrow mb-3">How it works</p>
-            <h2 className="font-display text-display-lg font-medium">Three steps. No setup on the page.</h2>
+            <h2 className="font-display text-display-lg font-bold">Three steps. No setup on the page.</h2>
           </div>
           <p className="text-xl leading-relaxed text-muted">
             Sightline was designed to be used without looking at it. Every control has a key, every result is
@@ -35,8 +35,8 @@ export default function HowItWorks() {
         <ol className="grid gap-5 md:grid-cols-3">
           {steps.map((s) => (
             <li key={s.n} className="card p-7">
-              <div className="font-display text-6xl font-light text-amber/70">{s.n}</div>
-              <h3 className="mt-6 font-display text-2xl font-medium">{s.title}</h3>
+              <div className="font-mono text-5xl font-semibold text-cyan/70">{s.n}</div>
+              <h3 className="mt-6 font-display text-2xl font-bold">{s.title}</h3>
               <p className="mt-2 text-lg leading-relaxed text-muted">{s.text}</p>
               {s.keys && (
                 <div className="mt-5 flex gap-2">

@@ -4,17 +4,17 @@ import { cn } from "@/lib/utils";
 export function Logo({ className }: { className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
-      <span className="relative grid h-9 w-9 place-items-center rounded-full bg-ink hairline">
-        <span className="h-4 w-4 rounded-full bg-amber" />
-        <span className="absolute h-[7px] w-[7px] rounded-full bg-ink" />
+      <span className="relative grid h-9 w-9 place-items-center rounded-md bg-surface hairline">
+        <span className="absolute inset-[5px] rounded-sm border border-cyan/60" />
+        <span className="h-3 w-3 rounded-full bg-cyan shadow-glow" />
       </span>
-      <span className="font-display text-2xl font-semibold tracking-tight">Sightline</span>
+      <span className="font-display text-2xl font-bold tracking-tight">Sightline</span>
     </span>
   );
 }
 
 const links = [
-  { to: "/#features", label: "What it does" },
+  { to: "/#features", label: "Capabilities" },
   { to: "/#how", label: "How it works" },
   { to: "/privacy", label: "Privacy" },
   { to: "/docs", label: "Docs" },
@@ -36,13 +36,18 @@ export default function Nav() {
             </NavLink>
           ))}
         </nav>
-        <Link
-          to="/app"
-          className={cn("btn px-5 py-2.5 text-base", inApp ? "btn-ghost" : "btn-amber")}
-          aria-current={inApp ? "page" : undefined}
-        >
-          {inApp ? "Using the app" : "Open the app"}
-        </Link>
+        <div className="flex items-center gap-4">
+          <span className="readout hidden items-center gap-2 lg:inline-flex" aria-hidden>
+            <span className="h-1.5 w-1.5 rounded-full bg-signal animate-blink" /> vision · online
+          </span>
+          <Link
+            to="/app"
+            className={cn("btn px-5 py-2.5 text-base", inApp ? "btn-ghost" : "btn-cyan")}
+            aria-current={inApp ? "page" : undefined}
+          >
+            {inApp ? "In the app" : "Open the app"}
+          </Link>
+        </div>
       </div>
     </header>
   );
