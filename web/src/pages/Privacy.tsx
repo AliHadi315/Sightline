@@ -48,7 +48,7 @@ export default function Privacy() {
         <ul className="mt-3 list-disc space-y-2 pl-6 text-lg text-muted">
           <li>The single frame you captured, sent to Google's Gemini API through the server, for that one request.</li>
           <li>The description text, sent to Microsoft's Edge read-aloud service through the unofficial edge-tts client to make the audio.</li>
-          <li>One log line per call on the server (timestamp, mode, latency, token counts, the model's text reply, any error). No image is logged.</li>
+          <li>Nothing else. This public site keeps no log at all. When you run Sightline on your own machine, one log line per call is written locally (timestamp, mode, latency, token counts, the model's text reply, any error); no image is ever logged.</li>
         </ul>
       </div>
     </div>

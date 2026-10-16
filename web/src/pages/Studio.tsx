@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, CameraOff, Eye, BookOpenText, Square, Play, KeyRound, Images, Upload, Loader2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { describe, getSamples, getStatus, loadKey, saveKey, speak, type Described, type Mode, type Observation, type Sample, type Status } from "@/lib/api";
+import { checkKey, describe, getSamples, getStatus, loadKey, saveKey, speak, type Described, type Mode, type Observation, type Sample, type Status } from "@/lib/api";
 
 type Phase = "idle" | "capturing" | "thinking" | "speaking";
 
@@ -33,6 +33,18 @@ export default function Studio() {
   const busy = phase === "capturing" || phase === "thinking";
   const [elapsed, setElapsed] = useState(0);
   const hasKey = ownKey.trim().length > 0;
+  // key check on paste: "checking" while the server asks Google, then ok / bad / unknown (could not check)
+  const [keyState, setKeyState] = useState<"none" | "checking" | "ok" | "bad" | "unknown">(hasKey ? "unknown" : "none");
+  useEffect(() => {
+    const key = ownKey.trim();
+    if (!key) { setKeyState("none"); return; }
+    setKeyState("checking");
+    const id = window.setTimeout(async () => {
+      const r = await checkKey(key);
+      setKeyState(r.valid === true ? "ok" : r.valid === false ? "bad" : "unknown");
+    }, 600);
+    return () => window.clearTimeout(id);
+  }, [ownKey]);
 
   // elapsed-seconds display while waiting for the model (display only; never triggers a capture)
   useEffect(() => {
@@ -128,6 +140,11 @@ export default function Studio() {
       keyRef.current?.focus();
       return;
     }
+    if (!sample && keyState === "bad") {
+      setError("Google rejected this key. Check it and paste it again.");
+      keyRef.current?.focus();
+      return;
+    }
     setPhase("capturing");
     try {
       let blob: Blob | undefined;
@@ -163,7 +180,7 @@ export default function Studio() {
       setError("Could not reach the server. Check the connection and try again.");
       setPhase("idle");
     }
-  }, [busy, sample, hasKey, captureBlob, camera, ownKey, memory, playText, stopAudio]);
+  }, [busy, sample, hasKey, keyState, captureBlob, camera, ownKey, memory, playText, stopAudio]);
 
   // keyboard: space = scene, r = read, esc = stop
   useEffect(() => {
@@ -228,17 +245,23 @@ export default function Studio() {
         role="status"
         className={cn(
           "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4 text-lg",
-          hasKey ? "border border-signal/30 bg-signal-soft" : "border border-amber/40 bg-amber-soft",
+          keyState === "bad" ? "border border-rose/40 bg-rose-soft"
+            : hasKey && keyState !== "checking" ? "border border-signal/30 bg-signal-soft"
+            : "border border-amber/40 bg-amber-soft",
         )}
       >
         <span>
-          {hasKey ? (
+          {keyState === "checking" ? (
+            <><strong>Checking your key…</strong></>
+          ) : keyState === "bad" ? (
+            <><strong>Key rejected.</strong> Google did not accept this key. Check it and paste it again.</>
+          ) : hasKey ? (
             <><strong>Live.</strong> Press a button or use <kbd className="kbd">space</kbd> / <kbd className="kbd">r</kbd>.</>
           ) : (
             <><strong>Demo mode.</strong> Samples work now; add your key above to describe your own camera.</>
           )}
         </span>
-        {status && <span className="readout">{hasKey ? "your key" : "no key"} · {result?.model ?? status.model}</span>}
+        {status && <span className="readout">{keyState === "ok" ? "key accepted" : hasKey ? "your key" : "no key"} · {result?.model ?? status.model}</span>}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
