@@ -20,7 +20,7 @@ export default function Hero() {
   return (
     <section className="grain relative overflow-hidden px-5 pb-16 pt-16 sm:px-8 md:pb-24 md:pt-24">
       <div className="absolute inset-0 dotgrid" aria-hidden />
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1fr_1.15fr]">
+      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <div className="flex flex-col gap-7">
           <motion.p {...appear(0)} className="eyebrow flex items-center gap-3">
             <span className="h-px w-8 bg-cyan" /> Assistive vision · for low vision
