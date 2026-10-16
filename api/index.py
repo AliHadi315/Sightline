@@ -59,6 +59,25 @@ def status(own_key: int = 0):
     return {"model": config.MODEL, "voice": config.VOICE, "live": reason is None, "demo_reason": reason}
 
 
+@app.post("/api/check_key")
+def check_key(key: str = Form("")):
+    """Tell the visitor at paste time whether Google accepts their key. Lists one model, which costs no quota."""
+    key = key.strip()
+    if not key:
+        return {"valid": False, "message": "No key."}
+    try:
+        from google.genai import errors, types
+
+        next(iter(vision._client(key).models.list(config=types.ListModelsConfig(page_size=1, http_options=types.HttpOptions(timeout=8000)))))
+        return {"valid": True, "message": "Key accepted."}
+    except errors.APIError as e:
+        if getattr(e, "code", None) in (400, 401, 403):
+            return {"valid": False, "message": "Google rejected this key. Check it and paste it again."}
+        return {"valid": None, "message": "Could not check the key right now; try describing anyway."}
+    except Exception:  # noqa: BLE001 - network trouble is not the visitor's fault
+        return {"valid": None, "message": "Could not check the key right now; try describing anyway."}
+
+
 @app.get("/api/samples")
 def samples():
     return [{"name": n, "caption": SAMPLE_CAPTIONS.get(n, n), "image": f"/api/samples/{n}", **CACHED[n]} for n in SAMPLE_NAMES]

@@ -49,6 +49,19 @@ export function saveKey(key: string): void {
   } catch { /* storage blocked: the key still works for this page load */ }
 }
 
+/** Ask the server whether Google accepts a key. valid: true | false | null (could not check). */
+export async function checkKey(key: string): Promise<{ valid: boolean | null; message: string }> {
+  const form = new FormData();
+  form.append("key", key);
+  try {
+    const r = await fetch("/api/check_key", { method: "POST", body: form });
+    if (!r.ok) return { valid: null, message: "Could not check the key right now." };
+    return r.json();
+  } catch {
+    return { valid: null, message: "Could not check the key right now." };
+  }
+}
+
 export async function getStatus(ownKey: boolean): Promise<Status> {
   const r = await fetch(`/api/status?own_key=${ownKey ? 1 : 0}`);
   if (!r.ok) throw new Error(`status ${r.status}`);
