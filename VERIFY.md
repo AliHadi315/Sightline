@@ -9,7 +9,7 @@ Each step lists the exact command and what you should see.
 pip install -r requirements-desktop.txt
 ```
 
-Expected: finishes without errors. `pip list` shows `google-genai`, `edge-tts`, `gradio`, `fastapi`,
+Expected: finishes without errors. `pip list` shows `google-genai`, `edge-tts`, `fastapi`,
 `opencv-python`, `pygame-ce`, `Pillow`. (`pygame-ce` is the community build; it is imported as `pygame`.
 `requirements.txt` alone is the slim set the Vercel function installs.)
 If `import cv2` later fails with "The function is not implemented" when opening a window, an
@@ -30,7 +30,7 @@ python -c "import config; print(config.MODEL, bool(config.GEMINI_API_KEY))"
 
 Expected: `gemini-3.1-flash-lite True`. `False` means the key was not read; check `.env`.
 
-## 3. Core boundary (no OpenCV / pygame / Gradio in the shared core)
+## 3. Core boundary (no OpenCV / pygame / web framework in the shared core)
 
 ```bash
 python -c "import re,sys; bad=[f for f in ('vision.py','speech.py','memory.py') if re.search(r'^\s*(import|from)\s+(cv2|pygame|gradio)', open(f).read(), re.M)]; print('boundary ok' if not bad else 'VIOLATION: '+', '.join(bad))"
@@ -133,38 +133,7 @@ Error paths: run with the camera unplugged or in use → `Camera 0 is not availa
 Empty `.env` key → `No GEMINI_API_KEY found...` and exit. Disconnect the network and press `space`
 → `Network error. Check your internet connection.` on screen, the loop keeps running.
 
-## 12. Web demo, live mode
-
-```bash
-python app.py
-```
-
-Open <http://127.0.0.1:7860>. Expected:
-
-1. A green banner reads `Ready. Take a photo, then press a button. Live descriptions used this session: 0 / 10.`
-   Four tabs are visible: *Use my camera*, *Try a sample*, *Settings*, *About & privacy*.
-2. Allow the camera, click the shutter, press **Describe the scene**: the description appears in
-   large text and plays automatically. The banner shows `Done in N s` and `1 / 10`.
-3. With text in view, take a new photo and press **Read the text** (or the `r` key): the text is
-   read verbatim.
-4. Press `space` with the page focused: same as clicking **Describe the scene**. Press `esc` while
-   audio plays: it stops.
-5. Open *Recent descriptions* under the audio player: the results so far are listed, newest first.
-6. On the *Try a sample* tab click the sign image, then **Read the text in this sample**: the saved
-   text plays and a blue banner says `No API call made`.
-7. Press **Describe the scene** eleven times on the camera tab: after the tenth the banner turns
-   yellow with `Demo mode. This session has used its 10 live descriptions.` and a sample plays instead.
-
-## 13. Web demo, demo mode (no key)
-
-Stop the server, temporarily blank `GEMINI_API_KEY` in `.env`, and run `python app.py` again.
-
-Expected: a yellow banner `Demo mode. No API key is configured. Paste your own free Gemini key under Settings. ...`.
-**Describe the scene** on the camera tab plays a saved sample description. Paste a key on the
-*Settings* tab: the banner turns green with `Ready.` and the camera buttons make real calls.
-Restore `.env` afterwards.
-
-## 13b. Website (React site + API + Gradio on one port)
+## 12. Website (React site + API on one port)
 
 ```bash
 cd web && npm install && npm run build && cd ..
@@ -194,8 +163,7 @@ Open <http://127.0.0.1:7860>. Expected:
    `No API call made`. This works with or without a key.
 6. Deny or lack a camera: the viewfinder says "No camera. Upload a photo or pick a sample." and
    **Upload a photo instead** works with any JPEG.
-7. <http://127.0.0.1:7860/gradio> shows the Gradio interface; <http://127.0.0.1:7860/api/docs> shows
-   the API reference; an unknown path such as `/anything` falls back to the site.
+7. <http://127.0.0.1:7860/api/docs> shows the API reference; an unknown path such as `/anything` falls back to the site.
 
 API smoke test without a browser:
 
@@ -207,7 +175,7 @@ Expected: `False True EXIT. Meeting Room 2B. Please knock before entering. Open 
 (no key: not live; with a key: live; samples work either way).
 
 
-## 13c. Rate limiting, headers, and the new pages
+## 13. Rate limiting, headers, and the new pages
 
 ```bash
 python -c "import server; from fastapi.testclient import TestClient as T; c=T(server.api); h={'x-forwarded-for':'203.0.113.9'}; print([c.post('/api/check_key', data={'key':''}, headers=h).status_code for _ in range(11)][-2:])"

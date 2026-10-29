@@ -1,6 +1,6 @@
 """Sightline JSON API. One FastAPI app used two ways:
 
-  - locally, mounted by server.py together with the built site and the Gradio UI;
+  - locally, served by server.py together with the built site;
   - on Vercel, as the serverless function behind /api/* (see vercel.json).
 
 Every visitor brings their own free Gemini key: it travels with each request and is never

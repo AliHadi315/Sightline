@@ -101,8 +101,8 @@ export default function Docs() {
 
         <Section id="under" title="Under the hood">
           <p>
-            One shared core handles vision, speech and memory. Three front ends use it unchanged: this website, a desktop
-            app with a live camera window and the same hotkeys, and a plain Gradio interface. An eval harness scores the
+            One shared core handles vision, speech and memory. Two front ends use it unchanged: this website, and a desktop
+            app with a live camera window and the same hotkeys. An eval harness scores the
             scene prompt against reference photos. The whole thing is open source.
           </p>
           <p>

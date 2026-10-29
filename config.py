@@ -50,7 +50,6 @@ SIMILARITY_THRESHOLD = 0.85    # normalized text similarity above this = "No cha
 
 # --- Rate limiting ----------------------------------------------------------
 COOLDOWN_SECONDS = 3.0         # minimum gap between manual triggers
-SESSION_CAP = 10               # Gradio UI: live calls per session on the local .env key
 # The website has no shared key: every visitor supplies their own, so there is nothing to ration there.
 
 # --- Paths ------------------------------------------------------------------
