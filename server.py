@@ -5,6 +5,7 @@
 On Vercel the same API runs as a serverless function and the site is served statically; this file
 is only for running everything on one port locally.
 """
+import json
 import os
 
 import gradio as gr
@@ -16,6 +17,21 @@ import config
 from api.index import app as api
 
 DIST = config.ROOT / "web" / "dist"
+
+# Apply the same security headers Vercel sends (single source of truth: vercel.json), so the
+# Content-Security-Policy can be tested locally before a deploy.
+_vercel = json.loads((config.ROOT / "vercel.json").read_text(encoding="utf-8"))
+SECURITY_HEADERS = {h["key"]: h["value"] for block in _vercel.get("headers", []) if block["source"] == "/(.*)" for h in block["headers"]}
+
+
+@api.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    if not request.url.path.startswith("/gradio"):  # Gradio needs inline scripts the CSP does not allow
+        for key, value in SECURITY_HEADERS.items():
+            response.headers.setdefault(key, value)
+    return response
+
 
 api = gr.mount_gradio_app(api, gradio_app.demo, path="/gradio")
 

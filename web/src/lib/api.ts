@@ -82,6 +82,9 @@ export async function describe(opts: { mode: Mode; blob?: Blob; sample?: string;
   form.append("history", JSON.stringify(opts.history));
   if (opts.blob) form.append("image", opts.blob, "frame.jpg");
   const r = await fetch("/api/describe", { method: "POST", body: form });
+  if (r.status === 429) {
+    return { source: "error", mode: opts.mode, description: "", message: "Too many requests from your connection. Wait a minute and try again." };
+  }
   if (!r.ok) throw new Error(`describe ${r.status}`);
   return r.json();
 }

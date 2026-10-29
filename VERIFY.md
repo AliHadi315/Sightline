@@ -207,6 +207,23 @@ Expected: `False True EXIT. Meeting Room 2B. Please knock before entering. Open 
 (no key: not live; with a key: live; samples work either way).
 
 
+## 13c. Rate limiting, headers, and the new pages
+
+```bash
+python -c "import server; from fastapi.testclient import TestClient as T; c=T(server.api); h={'x-forwarded-for':'203.0.113.9'}; print([c.post('/api/check_key', data={'key':''}, headers=h).status_code for _ in range(11)][-2:])"
+```
+
+Expected: `[200, 429]` (ten key checks per minute per IP, the eleventh refused).
+
+```bash
+curl -s -D - -o NUL http://127.0.0.1:7860/app | findstr /i "content-security x-frame permissions-policy"
+```
+
+(with `python server.py` running; on macOS/Linux use `-o /dev/null` and `grep -i`.) Expected: the three
+headers from `vercel.json`. In the browser, `/anything-unknown` shows the 404 page with the title
+`Page not found · Sightline`; `/terms` shows the terms; the tab title changes per page; on a phone
+width the header shows a menu button and the app page a sticky Describe / Read bar at the bottom.
+
 ## 14. Eval harness
 
 ```bash

@@ -6,6 +6,8 @@ import Landing from "@/pages/Landing";
 import Studio from "@/pages/Studio";
 import Privacy from "@/pages/Privacy";
 import Docs from "@/pages/Docs";
+import Terms from "@/pages/Terms";
+import NotFound from "@/pages/NotFound";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -33,7 +35,8 @@ export default function App() {
           <Route path="/app" element={<Studio />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/docs" element={<Docs />} />
-          <Route path="*" element={<Landing />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />
