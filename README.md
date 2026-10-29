@@ -39,6 +39,16 @@ Sightline is built for someone who cannot see the screen and wants to know what 
 what a sign says, or whether the room has changed. Everything it finds is spoken aloud, in plain
 language, with directions like *"to your left"* and *"in front of you"*.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Landing page: Point. Press. Hear. beside a viewfinder showing a real desk photo with detection boxes](docs/landing.png) | ![Capabilities grid: scene detection, read mode, only what changed, manual capture, no guessing about people, free-tier limits](docs/capabilities.png) |
+| ![About page with what it is, how a description happens, privacy rules, limits and the speech chain](docs/about.png) | ![Privacy page listing the three non-negotiable rules and the formal policy](docs/privacy.png) |
+| ![App page on a phone: sample in the viewfinder, result in large type, sticky Describe and Read bar at the bottom](docs/app-phone.png) | ![Desktop app window: live frame with FPS and state overlay, the full description in a panel underneath](docs/desktop-app.png) |
+
+The desktop window is rendered by the app's own drawing code from a sample frame, so it shows exactly what the camera window looks like without exposing a real camera feed.
+
 ## Highlights
 
 | | |
