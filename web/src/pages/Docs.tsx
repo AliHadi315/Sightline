@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { usePageMeta } from "@/lib/meta";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ const toc = [
 ];
 
 export default function Docs() {
+  usePageMeta("About", "What Sightline is, how a description happens, the privacy rules, free-tier limits and how it speaks.");
   return (
     <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-[220px_1fr] md:py-24">
       <nav aria-label="On this page" className="md:sticky md:top-24 md:self-start">

@@ -1,4 +1,6 @@
 import { Hand, ShieldOff, Trash2, KeyRound } from "lucide-react";
+import { Link } from "react-router-dom";
+import { usePageMeta } from "@/lib/meta";
 
 const rules = [
   {
@@ -24,6 +26,7 @@ const rules = [
 ];
 
 export default function Privacy() {
+  usePageMeta("Privacy", "Sightline's privacy rules: manual capture only, no demographic inference, nothing stored, no cookies, your own key.");
   return (
     <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 md:py-24">
       <p className="eyebrow mb-3">Privacy rules</p>
@@ -51,6 +54,15 @@ export default function Privacy() {
           <li>Nothing else. This public site keeps no log at all. When you run Sightline on your own machine, one log line per call is written locally (timestamp, mode, latency, token counts, the model's text reply, any error); no image is ever logged.</li>
         </ul>
       </div>
+      <section aria-labelledby="policy" className="mt-12 space-y-4 text-lg leading-relaxed text-muted [&_strong]:text-cream">
+        <h2 id="policy" className="font-display text-2xl font-bold text-cream">Privacy policy</h2>
+        <p><strong>Who runs this.</strong> Sightline is a personal open-source project by Ali Hadi Meselmani. Questions about privacy can be raised on the project's <a className="text-cream underline" href="https://github.com/AliHadi315/Sightline" target="_blank" rel="noreferrer">GitHub page</a>.</p>
+        <p><strong>What we collect.</strong> Nothing. No account, no sign-up, no analytics, no tracking pixels, no advertising, no cookies. The site sets no cookies at all, which is why there is no cookie banner. The only thing stored in your browser is the Gemini key you choose to paste, in this tab's session storage, so you do not have to paste it again after a reload; it is deleted when the tab closes.</p>
+        <p><strong>Who else sees your data.</strong> A captured frame goes to Google (Gemini API) under your own key and Google's terms. Description text may go to Microsoft (Edge read-aloud) to be spoken. The site is hosted on Vercel, which, like any host, sees connection metadata such as your IP address and may keep short-lived access logs for operating the service. Sightline itself keeps none of it.</p>
+        <p><strong>Rate limiting.</strong> To keep the free service available, the server counts requests per connection for one minute in memory and refuses excess requests. The counter holds no personal data beyond the IP address and is discarded within a minute.</p>
+        <p><strong>Your rights.</strong> Because nothing is retained, there is nothing to export or delete on our side. To stop Google from having your key, revoke it in Google AI Studio.</p>
+        <p>Last updated 29 October 2026. See also the <Link to="/terms" className="text-cream underline">terms of use</Link>.</p>
+      </section>
     </div>
   );
 }

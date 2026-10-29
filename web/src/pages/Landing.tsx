@@ -4,8 +4,10 @@ import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import HowItWorks from "@/components/HowItWorks";
 import FAQ from "@/components/FAQ";
+import { usePageMeta } from "@/lib/meta";
 
 export default function Landing() {
+  usePageMeta("", "Point the camera, press once, hear what is there or have the text read aloud. An assistive scene narrator for people with low vision. Manual capture only, nothing stored.");
   return (
     <>
       <Hero />
@@ -42,6 +44,11 @@ export default function Landing() {
           </Link>
         </div>
       </section>
+      {/* sticky CTA on phones; the hero button scrolls away quickly on a small screen */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink/90 p-3 backdrop-blur-md md:hidden" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+        <Link to="/app" className="btn btn-cyan w-full py-4 text-lg">Open the app <ArrowRight className="h-5 w-5" /></Link>
+      </div>
+      <div className="h-20 md:hidden" aria-hidden />
     </>
   );
 }

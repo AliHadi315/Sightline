@@ -11,13 +11,16 @@ instance can answer. Uses vision / speech / memory unchanged.
 import io
 import json
 import sys
+import threading
+import time
+from collections import defaultdict, deque
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:  # Vercel runs the function from a bundle; make `import config` work
     sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, File, Form, UploadFile  # noqa: E402
+from fastapi import FastAPI, File, Form, Request, UploadFile  # noqa: E402
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse  # noqa: E402
 from PIL import Image  # noqa: E402
 
@@ -33,6 +36,45 @@ MAX_SPEAK_CHARS = 1500
 NO_KEY = "No API key yet. Paste your own free Gemini key to describe your camera."
 
 app = FastAPI(title="Sightline API", docs_url="/api/docs", redoc_url=None)
+
+# --- rate limiting -------------------------------------------------------------------
+# ponytail: in-memory sliding window per client IP. On Vercel each warm instance counts on its own,
+# so this is a best-effort brake on hammering, not a hard quota; the visitor's own Gemini key is
+# what actually bounds cost. Upgrade path: a shared store (Upstash/KV) if abuse ever shows up.
+RATE_WINDOW = 60
+RATE_LIMITS = {"/api/describe": 20, "/api/speak": 40, "/api/check_key": 10}
+RATE_DEFAULT = 120
+_hits: dict[tuple[str, str], deque] = defaultdict(deque)
+_hits_lock = threading.Lock()
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    return (forwarded.split(",")[0].strip() if forwarded else None) or (request.client.host if request.client else "unknown")
+
+
+def _rate_limited(ip: str, path: str) -> bool:
+    limit = RATE_LIMITS.get(path, RATE_DEFAULT)
+    now = time.monotonic()
+    with _hits_lock:
+        q = _hits[(ip, path)]
+        while q and now - q[0] > RATE_WINDOW:
+            q.popleft()
+        if len(q) >= limit:
+            return True
+        q.append(now)
+        if len(_hits) > 10_000:  # forget idle clients instead of growing forever
+            for key in [k for k, v in _hits.items() if not v or now - v[-1] > RATE_WINDOW]:
+                del _hits[key]
+    return False
+
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    if request.url.path.startswith("/api/") and _rate_limited(_client_ip(request), request.url.path):
+        return JSONResponse({"error": "rate_limited", "message": "Too many requests from your connection. Wait a minute and try again."},
+                            status_code=429, headers={"Retry-After": str(RATE_WINDOW)})
+    return await call_next(request)
 
 
 def demo_reason(user_key: str) -> str | None:

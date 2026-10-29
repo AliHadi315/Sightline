@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, CameraOff, Eye, BookOpenText, Square, Play, KeyRound, Images, Upload, Loader2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePageMeta } from "@/lib/meta";
 import { checkKey, describe, getSamples, getStatus, loadKey, saveKey, speak, type Described, type Mode, type Observation, type Sample, type Status } from "@/lib/api";
 
 type Phase = "idle" | "capturing" | "thinking" | "speaking";
@@ -12,6 +13,7 @@ const HISTORY_LIMIT = 8;
 const MEMORY_LIMIT = 3;
 
 export default function Studio() {
+  usePageMeta("App", "Describe what your camera sees or read the text in view, out loud. Uses your camera and your own free Gemini key; nothing is saved.");
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -234,9 +236,18 @@ export default function Studio() {
               onChange={(e) => onKeyChange(e.target.value)}
               placeholder="Paste your free Google AI Studio key"
               autoComplete="off"
-              className="w-full max-w-xl rounded-xl bg-ink px-4 py-3 text-lg hairline placeholder:text-muted"
+              aria-invalid={keyState === "bad"}
+              aria-describedby="key-help"
+              className={cn("w-full max-w-xl rounded-xl bg-ink px-4 py-3 text-lg placeholder:text-muted", keyState === "bad" ? "border-2 border-rose" : "hairline")}
             />
           </label>
+          <p id="key-help" className={cn("text-base", keyState === "bad" ? "text-rose" : keyState === "ok" ? "text-signal" : "text-muted")} aria-live="polite">
+            {keyState === "bad" ? "Google rejected this key. Check for missing characters and paste it again."
+              : keyState === "ok" ? "Key accepted. You can describe your camera now."
+              : keyState === "checking" ? "Checking the key with Google…"
+              : keyState === "unknown" ? "Could not check the key right now; you can still try describing."
+              : "Nothing is stored. The key stays in this tab only."}
+          </p>
         </div>
       </section>
 
@@ -304,7 +315,7 @@ export default function Studio() {
             )}
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-2">
+          <div className="grid gap-3 xl:grid-cols-2" id="main-actions">
             <button className="btn btn-cyan btn-lg" onClick={() => run("scene")} disabled={busy} aria-keyshortcuts="Space">
               {busy ? <Loader2 className="h-7 w-7 animate-spin" /> : <Eye className="h-7 w-7" />} Describe the scene
               <kbd className="kbd ml-1 text-ink/70 border-ink/20 bg-ink/10">space</kbd>
@@ -393,6 +404,17 @@ export default function Studio() {
         <KeyRound className="h-4 w-4 text-signal" aria-hidden />
         Your key is used only for your own requests and never leaves this tab except inside them.
       </p>
+
+      {/* sticky action bar on phones: the two main buttons within thumb reach wherever the page is scrolled */}
+      <div className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 gap-2 border-t border-line bg-ink/90 p-2 backdrop-blur-md md:hidden" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }} aria-label="Quick actions">
+        <button className="btn btn-cyan min-h-[60px] text-lg" onClick={() => run("scene")} disabled={busy}>
+          {busy ? <Loader2 className="h-6 w-6 animate-spin" /> : <Eye className="h-6 w-6" />} Describe
+        </button>
+        <button className="btn btn-signal min-h-[60px] text-lg" onClick={() => run("read")} disabled={busy}>
+          <BookOpenText className="h-6 w-6" /> Read text
+        </button>
+      </div>
+      <div className="h-24 md:hidden" aria-hidden />
     </div>
   );
 }

@@ -217,6 +217,23 @@ written to `evals/results.json`. `--sleep` (default 5 s) keeps a full run inside
 To add a frame: put the image in `evals/frames/` and add `"name.jpg": ["object", "other|synonym"]`
 to `evals/expected.json`.
 
+## Security
+
+- **No secrets in the browser.** The site ships no key; each visitor's key travels only inside their own
+  requests and is never logged. Locally, the key comes from `.env` through `config.py`.
+- **Rate limiting.** The API counts requests per client IP over a one-minute window in memory
+  (describe 20, speak 40, key check 10, anything else 120) and answers 429 with a plain message.
+  On serverless each warm instance counts separately, so this is a brake on hammering, not a quota.
+- **Security headers** in `vercel.json`: a Content-Security-Policy that allows only the site's own
+  scripts, Google Fonts styles, blob audio and data-URI images; `frame-ancestors 'none'`; nosniff;
+  a Permissions-Policy that grants the camera to the site only; HSTS. The local server applies the
+  same headers from the same file so the policy can be tested before a deploy.
+- **Inputs.** Uploads go through Pillow with its decompression-bomb limit, sample names are
+  whitelisted, history JSON is parsed defensively, spoken text is capped at 1,500 characters, and
+  every handler returns a plain message instead of a traceback.
+- **No cookies, no tracking.** Nothing to consent to, so there is no cookie banner. The privacy page
+  carries a short formal policy and the terms page a plain-language disclaimer.
+
 ## Logging
 
 Every Gemini call appends one line to `logs/log.jsonl`: ISO timestamp, mode, latency in ms, token
