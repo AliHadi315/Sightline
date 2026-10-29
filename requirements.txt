@@ -1,6 +1,6 @@
 # Core + API (this is what Vercel installs for the serverless function). Desktop and Gradio extras: requirements-desktop.txt
 google-genai>=1.20
-edge-tts>=7.0
+edge-tts>=7.3.1   # 7.3.1 restored the Edge read-aloud handshake after Microsoft's October 2026 change
 Pillow>=10.0
 fastapi>=0.110
 python-multipart>=0.0.9
