@@ -7,7 +7,7 @@
 **A webcam scene narrator for people with low vision.**
 One press describes what is in front of you, or reads any visible text aloud, word for word.
 
-[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Setup](#setup) · [Privacy](#privacy-by-design)
+[**Live demo**](https://sightline-rho-khaki.vercel.app) · [How it works](#how-it-works) · [Run it yourself](#run-it-yourself) · [Privacy](#privacy-by-design)
 
 [![Live on Vercel](https://img.shields.io/badge/Live-sightline--rho--khaki.vercel.app-F5B82E?style=flat-square&logo=vercel&logoColor=black)](https://sightline-rho-khaki.vercel.app)
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -82,106 +82,6 @@ serverless function on Vercel.
   overwritten on every capture. The web demo writes no frames at all and forgets your API key when the
   request finishes.
 
-## Setup
-
-Everything runs on free tiers: a free Google AI Studio key, free `edge-tts` speech, free Vercel
-hosting. No billing account is ever needed.
-
-1. **Get a free Gemini key.** Go to <https://aistudio.google.com/apikey>, sign in with a Google
-   account, click *Create API key*. Do not enable Google Cloud Billing and do not use Vertex AI.
-2. **Install.**
-
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate          # Windows;  source venv/bin/activate on macOS / Linux
-   pip install -r requirements-desktop.txt   # core + desktop app + Gradio + local server
-   ```
-
-   `requirements.txt` alone is the slim set (Gemini, edge-tts, Pillow, FastAPI) that the Vercel
-   serverless function installs.
-
-3. **Configure.** Copy `.env.example` to `.env` and paste your key after `GEMINI_API_KEY=`.
-
-The Gemini model is a single constant, `MODEL` in `config.py` (currently `gemini-3.1-flash-lite`,
-the fastest free-tier vision model, about 2 s per frame when Google is not congested). If it is
-overloaded, hangs, or is rate limited, the call switches automatically to the models in
-`FALLBACK_MODELS`; the model actually used is recorded in each log line and API response.
-Gemini 1.5 is retired for new keys; keep these on current Flash models.
-
-## Desktop app
-
-```bash
-python main.py
-```
-
-A window shows the live camera with an FPS counter, the current state
-(`IDLE / CAPTURING / THINKING / SPEAKING`), the active mode, and the cooldown timer.
-
-| Key     | Action                                             |
-|---------|----------------------------------------------------|
-| `space` | Describe the scene                                 |
-| `r`     | Read visible text aloud                            |
-| `esc`   | Stop speaking immediately and return to idle       |
-| `q`     | Quit                                               |
-
-Pipeline per press: grab the current frame, downscale so the longest edge is 768 px, JPEG at
-quality 80, write `debug/last_frame.jpg`, send to Gemini, speak the answer. Capture, the API
-call, and speech all run on a worker thread, so the preview never stutters. Presses during
-processing and presses inside the 3-second cooldown are ignored, with a message on screen.
-
-If the camera cannot be opened, the key is missing, or the network is down, the app prints or
-displays a plain message rather than a traceback. Set `CAMERA_INDEX` in `.env` to pick another camera.
-
-## Website
-
-The public site is a small React app in `web/` (Vite, Tailwind, sections adapted from 21st.dev
-components) served by `server.py`, which also exposes the JSON API the site uses and mounts the
-Gradio interface at `/gradio`.
-
-```bash
-cd web && npm install && npm run build && cd ..   # writes web/dist (Vercel builds this itself)
-python server.py                                  # http://127.0.0.1:7860
-```
-
-Pages: landing (what it does, how it works, privacy, FAQ), `/app` (the tool), `/privacy`, `/docs`,
-`/gradio` (classic UI), `/api/docs` (API reference). The app page uses the browser camera, has the
-same `space` / `r` / `esc` keys as the desktop app, a photo-upload fallback, the three samples, a
-recent-descriptions list, and an own-key field. Frames go to the server only when you press a
-button and are never stored. For front-end development run `npm run dev` in `web/`; it proxies
-API calls to the Python server.
-
-## Gradio interface
-
-```bash
-python app.py
-```
-
-Then open <http://127.0.0.1:7860>. This is the plain Gradio version of the same tool, also
-reachable at `/gradio` when `server.py` is running. It is built for low vision: large type, high
-contrast, big buttons, and spoken output that plays automatically.
-
-- **Use my camera** tab: tap the camera shutter, then press **Describe the scene** or **Read the text**.
-  Keyboard: `space` = describe scene, `r` = read text, `esc` = stop the audio.
-  A *Recent descriptions* panel keeps the last few results so they can be re-read.
-- **Try a sample** tab: three sample images with saved descriptions, no API call, works without a camera or key.
-- **Settings** tab: paste a different free AI Studio key to use instead of the one in `.env`.
-- **About & privacy** tab: who it is for, how it works, the privacy rules, and the free-tier limits.
-
-**Every visitor brings their own key.** The website has no shared server key. The app page says
-so up front, with a note that it uses the camera and that nothing is saved: the live view stays in
-the browser, one frame is sent to Gemini only when a button is pressed and is discarded after, and no
-photo, description, or key is stored on the server. The visitor's key is kept in the tab's session
-storage (gone when the tab closes) and travels only inside their own requests. Because each key has
-its own free quota, there is no session cap or daily counter on the site.
-
-**Demo mode.** Without a key, the three sample images in `samples/` play their cached descriptions
-from `samples/cached.json`, and the status strip says a key is needed for the camera. The page always
-does something and never shows an error screen.
-
-The Gradio interface, being local, uses the key from `.env` (capped at 10 live descriptions per
-session) unless one is pasted under Settings.
-
-
 ## Free-tier limits and what the app does at them
 
 The AI Studio free tier allows roughly 10 to 15 requests per minute and a few hundred per day on
@@ -213,20 +113,6 @@ Flash models. Sightline is built to hit those limits gracefully:
 Every step is wrapped: the description is always shown as text, whatever the voices do. If
 edge-tts breaks, `pip install -U edge-tts` usually fixes it within days of Microsoft's change.
 
-## Evals
-
-```bash
-python run_evals.py --sleep 5
-```
-
-Runs the current scene prompt over every frame listed in `evals/expected.json`, checks that each
-required object (or one of its `|`-separated synonyms) appears in the description or object list,
-and prints a per-frame PASS/FAIL table plus a percentage. The score and per-frame details are
-written to `evals/results.json`. `--sleep` (default 5 s) keeps a full run inside the per-minute limit.
-
-To add a frame: put the image in `evals/frames/` and add `"name.jpg": ["object", "other|synonym"]`
-to `evals/expected.json`.
-
 ## Security
 
 - **No secrets in the browser.** The site ships no key; each visitor's key travels only inside their own
@@ -244,13 +130,135 @@ to `evals/expected.json`.
 - **No cookies, no tracking.** Nothing to consent to, so there is no cookie banner. The privacy page
   carries a short formal policy and the terms page a plain-language disclaimer.
 
-## Logging
+## Run it yourself
+
+Everything a developer needs lives in the block below: setup, the desktop app and its hotkeys, local
+website development, the Gradio interface, the eval harness, logging, and the file layout. Visitors
+who only want to use Sightline can stop here and open the [live site](https://sightline-rho-khaki.vercel.app).
+
+<details>
+<summary><strong>Open the developer guide</strong></summary>
+
+### Setup
+
+Everything runs on free tiers: a free Google AI Studio key, free `edge-tts` speech, free Vercel
+hosting. No billing account is ever needed.
+
+1. **Get a free Gemini key.** Go to <https://aistudio.google.com/apikey>, sign in with a Google
+   account, click *Create API key*. Do not enable Google Cloud Billing and do not use Vertex AI.
+2. **Install.**
+
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate          # Windows;  source venv/bin/activate on macOS / Linux
+   pip install -r requirements-desktop.txt   # core + desktop app + Gradio + local server
+   ```
+
+   `requirements.txt` alone is the slim set (Gemini, edge-tts, Pillow, FastAPI) that the Vercel
+   serverless function installs.
+
+3. **Configure.** Copy `.env.example` to `.env` and paste your key after `GEMINI_API_KEY=`.
+
+The Gemini model is a single constant, `MODEL` in `config.py` (currently `gemini-3.1-flash-lite`,
+the fastest free-tier vision model, about 2 s per frame when Google is not congested). If it is
+overloaded, hangs, or is rate limited, the call switches automatically to the models in
+`FALLBACK_MODELS`; the model actually used is recorded in each log line and API response.
+Gemini 1.5 is retired for new keys; keep these on current Flash models.
+
+### Desktop app
+
+```bash
+python main.py
+```
+
+A window shows the live camera with an FPS counter, the current state
+(`IDLE / CAPTURING / THINKING / SPEAKING`), the active mode, and the cooldown timer.
+
+| Key     | Action                                             |
+|---------|----------------------------------------------------|
+| `space` | Describe the scene                                 |
+| `r`     | Read visible text aloud                            |
+| `esc`   | Stop speaking immediately and return to idle       |
+| `q`     | Quit                                               |
+
+Pipeline per press: grab the current frame, downscale so the longest edge is 768 px, JPEG at
+quality 80, write `debug/last_frame.jpg`, send to Gemini, speak the answer. Capture, the API
+call, and speech all run on a worker thread, so the preview never stutters. Presses during
+processing and presses inside the 3-second cooldown are ignored, with a message on screen.
+
+If the camera cannot be opened, the key is missing, or the network is down, the app prints or
+displays a plain message rather than a traceback. Set `CAMERA_INDEX` in `.env` to pick another camera.
+
+### Website
+
+The public site is a small React app in `web/` (Vite, Tailwind, sections adapted from 21st.dev
+components) served by `server.py`, which also exposes the JSON API the site uses and mounts the
+Gradio interface at `/gradio`.
+
+```bash
+cd web && npm install && npm run build && cd ..   # writes web/dist (Vercel builds this itself)
+python server.py                                  # http://127.0.0.1:7860
+```
+
+Pages: landing (what it does, how it works, privacy, FAQ), `/app` (the tool), `/privacy`, `/docs`,
+`/gradio` (classic UI), `/api/docs` (API reference). The app page uses the browser camera, has the
+same `space` / `r` / `esc` keys as the desktop app, a photo-upload fallback, the three samples, a
+recent-descriptions list, and an own-key field. Frames go to the server only when you press a
+button and are never stored. For front-end development run `npm run dev` in `web/`; it proxies
+API calls to the Python server.
+
+### Gradio interface
+
+```bash
+python app.py
+```
+
+Then open <http://127.0.0.1:7860>. This is the plain Gradio version of the same tool, also
+reachable at `/gradio` when `server.py` is running. It is built for low vision: large type, high
+contrast, big buttons, and spoken output that plays automatically.
+
+- **Use my camera** tab: tap the camera shutter, then press **Describe the scene** or **Read the text**.
+  Keyboard: `space` = describe scene, `r` = read text, `esc` = stop the audio.
+  A *Recent descriptions* panel keeps the last few results so they can be re-read.
+- **Try a sample** tab: three sample images with saved descriptions, no API call, works without a camera or key.
+- **Settings** tab: paste a different free AI Studio key to use instead of the one in `.env`.
+- **About & privacy** tab: who it is for, how it works, the privacy rules, and the free-tier limits.
+
+**Every visitor brings their own key.** The website has no shared server key. The app page says
+so up front, with a note that it uses the camera and that nothing is saved: the live view stays in
+the browser, one frame is sent to Gemini only when a button is pressed and is discarded after, and no
+photo, description, or key is stored on the server. The visitor's key is kept in the tab's session
+storage (gone when the tab closes) and travels only inside their own requests. Because each key has
+its own free quota, there is no session cap or daily counter on the site.
+
+**Demo mode.** Without a key, the three sample images in `samples/` play their cached descriptions
+from `samples/cached.json`, and the status strip says a key is needed for the camera. The page always
+does something and never shows an error screen.
+
+The Gradio interface, being local, uses the key from `.env` (capped at 10 live descriptions per
+session) unless one is pasted under Settings.
+
+### Evals
+
+```bash
+python run_evals.py --sleep 5
+```
+
+Runs the current scene prompt over every frame listed in `evals/expected.json`, checks that each
+required object (or one of its `|`-separated synonyms) appears in the description or object list,
+and prints a per-frame PASS/FAIL table plus a percentage. The score and per-frame details are
+written to `evals/results.json`. `--sleep` (default 5 s) keeps a full run inside the per-minute limit.
+
+To add a frame: put the image in `evals/frames/` and add `"name.jpg": ["object", "other|synonym"]`
+to `evals/expected.json`.
+
+### Logging
 
 Every Gemini call appends one line to `logs/log.jsonl`: ISO timestamp, mode, latency in ms, token
 counts when reported, the raw response, and any error. It is local only and gitignored. Read it with
 `jq . logs/log.jsonl`.
 
-## Layout
+### Layout
 
 ```
 config.py       MODEL, VOICE, thresholds, .env loading
@@ -270,6 +278,8 @@ evals/          expected.json + frames/ (5 photos)
 
 `vision.py`, `speech.py`, and `memory.py` import nothing from OpenCV, pygame, or Gradio. That
 boundary is what lets both front ends share one core.
+
+</details>
 
 ## License
 
