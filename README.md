@@ -67,8 +67,8 @@ The desktop window is rendered by the app's own drawing code from a sample frame
 2. **Press once.** `space` describes the scene, `r` reads the text. That single frame goes to the model and is forgotten.
 3. **Listen.** The answer appears in large type and is spoken automatically. `esc` stops the voice.
 
-Three front ends share one core (`vision.py`, `speech.py`, `memory.py`): a desktop app with a live
-camera window, a Gradio interface, and a React website backed by a stateless API that runs as a
+Two front ends share one core (`vision.py`, `speech.py`, `memory.py`): a desktop app with a live
+camera window and a React website backed by a stateless API that runs as a
 serverless function on Vercel.
 
 ## Privacy, by design
@@ -133,7 +133,7 @@ edge-tts breaks, `pip install -U edge-tts` usually fixes it within days of Micro
 ## Run it yourself
 
 Everything a developer needs lives in the block below: setup, the desktop app and its hotkeys, local
-website development, the Gradio interface, the eval harness, logging, and the file layout. Visitors
+website development, the eval harness, logging, and the file layout. Visitors
 who only want to use Sightline can stop here and open the [live site](https://sightline-rho-khaki.vercel.app).
 
 <details>
@@ -151,7 +151,7 @@ hosting. No billing account is ever needed.
    ```bash
    python -m venv venv
    venv\Scripts\activate          # Windows;  source venv/bin/activate on macOS / Linux
-   pip install -r requirements-desktop.txt   # core + desktop app + Gradio + local server
+   pip install -r requirements-desktop.txt   # core + desktop app + local server
    ```
 
    `requirements.txt` alone is the slim set (Gemini, edge-tts, Pillow, FastAPI) that the Vercel
@@ -192,8 +192,7 @@ displays a plain message rather than a traceback. Set `CAMERA_INDEX` in `.env` t
 ### Website
 
 The public site is a small React app in `web/` (Vite, Tailwind, sections adapted from 21st.dev
-components) served by `server.py`, which also exposes the JSON API the site uses and mounts the
-Gradio interface at `/gradio`.
+components) served by `server.py`, which also exposes the JSON API the site uses.
 
 ```bash
 cd web && npm install && npm run build && cd ..   # writes web/dist (Vercel builds this itself)
@@ -201,28 +200,11 @@ python server.py                                  # http://127.0.0.1:7860
 ```
 
 Pages: landing (what it does, how it works, privacy, FAQ), `/app` (the tool), `/privacy`, `/docs`,
-`/gradio` (classic UI), `/api/docs` (API reference). The app page uses the browser camera, has the
+`/api/docs` (API reference). The app page uses the browser camera, has the
 same `space` / `r` / `esc` keys as the desktop app, a photo-upload fallback, the three samples, a
 recent-descriptions list, and an own-key field. Frames go to the server only when you press a
 button and are never stored. For front-end development run `npm run dev` in `web/`; it proxies
 API calls to the Python server.
-
-### Gradio interface
-
-```bash
-python app.py
-```
-
-Then open <http://127.0.0.1:7860>. This is the plain Gradio version of the same tool, also
-reachable at `/gradio` when `server.py` is running. It is built for low vision: large type, high
-contrast, big buttons, and spoken output that plays automatically.
-
-- **Use my camera** tab: tap the camera shutter, then press **Describe the scene** or **Read the text**.
-  Keyboard: `space` = describe scene, `r` = read text, `esc` = stop the audio.
-  A *Recent descriptions* panel keeps the last few results so they can be re-read.
-- **Try a sample** tab: three sample images with saved descriptions, no API call, works without a camera or key.
-- **Settings** tab: paste a different free AI Studio key to use instead of the one in `.env`.
-- **About & privacy** tab: who it is for, how it works, the privacy rules, and the free-tier limits.
 
 **Every visitor brings their own key.** The website has no shared server key. The app page says
 so up front, with a note that it uses the camera and that nothing is saved: the live view stays in
@@ -234,9 +216,6 @@ its own free quota, there is no session cap or daily counter on the site.
 **Demo mode.** Without a key, the three sample images in `samples/` play their cached descriptions
 from `samples/cached.json`, and the status strip says a key is needed for the camera. The page always
 does something and never shows an error screen.
-
-The Gradio interface, being local, uses the key from `.env` (capped at 10 live descriptions per
-session) unless one is pasted under Settings.
 
 ### Evals
 
@@ -266,9 +245,8 @@ vision.py       Gemini calls, prompts, response schema, retry/backoff, JSONL log
 speech.py       edge-tts synthesis to mp3
 memory.py       last-3 memory, change detection, repetition suppression
 main.py         desktop app: OpenCV loop, hotkeys, worker thread, pygame playback
-app.py          Gradio UI, imports vision/speech/memory unchanged
 api/index.py    stateless JSON API (FastAPI); the Vercel serverless function
-server.py       local server: API + web/dist + the Gradio UI at /gradio on one port
+server.py       local server: API + web/dist on one port
 web/            React site (Vite + Tailwind); web/dist is the built output
 vercel.json     Vercel build and routing config
 run_evals.py    eval harness
@@ -276,7 +254,7 @@ samples/        3 sample photos + cached.json for demo mode
 evals/          expected.json + frames/ (5 photos)
 ```
 
-`vision.py`, `speech.py`, and `memory.py` import nothing from OpenCV, pygame, or Gradio. That
+`vision.py`, `speech.py`, and `memory.py` import nothing from OpenCV or pygame. That
 boundary is what lets both front ends share one core.
 
 </details>

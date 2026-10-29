@@ -11,9 +11,7 @@ web/node_modules
 web/dist
 *.mp3
 main.py
-app.py
 server.py
 run_evals.py
-make_samples.py
 requirements-desktop.txt
 VERIFY.md
