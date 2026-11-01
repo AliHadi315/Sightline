@@ -26,9 +26,9 @@ export default function Docs() {
     <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-[220px_1fr] md:py-24">
       <nav aria-label="On this page" className="md:sticky md:top-24 md:self-start">
         <p className="eyebrow mb-3">About</p>
-        <ul className="space-y-2">
+        <ul>
           {toc.map(([id, label]) => (
-            <li key={id}><a className="text-muted hover:text-cream" href={`#${id}`}>{label}</a></li>
+            <li key={id}><a className="block py-2.5 text-muted hover:text-cream" href={`#${id}`}>{label}</a></li>
           ))}
         </ul>
       </nav>
@@ -63,7 +63,7 @@ export default function Docs() {
           </ol>
           <p>
             No camera handy? Three sample photos play saved descriptions without a key. A photo from your device can be
-            uploaded instead of a live frame.
+            uploaded instead of a live frame, and on a phone a Selfie button flips to the front camera.
           </p>
         </Section>
 

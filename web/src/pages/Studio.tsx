@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, Eye, BookOpenText, Square, Play, KeyRound, Images, Upload, Loader2, ShieldCheck } from "lucide-react";
+import { Camera, CameraOff, Eye, BookOpenText, Square, Play, KeyRound, Images, Upload, Loader2, ShieldCheck, SwitchCamera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePageMeta } from "@/lib/meta";
 import { checkKey, describe, getSamples, getStatus, loadKey, saveKey, speak, type Described, type Mode, type Observation, type Sample, type Status } from "@/lib/api";
@@ -60,20 +60,29 @@ export default function Studio() {
     try { setStatus(await getStatus(!!key.trim())); } catch { setStatus(null); }
   }, [ownKey]);
 
-  // camera: the live view stays in this browser; one frame is sent only when a button is pressed
+  // camera: the live view stays in this browser; one frame is sent only when a button is pressed.
+  // "environment" is the back camera, "user" the selfie camera; flipping restarts the stream.
+  const [facing, setFacing] = useState<"environment" | "user">("environment");
+  const [canFlip, setCanFlip] = useState(false);
   useEffect(() => {
     let stream: MediaStream | null = null;
+    let cancelled = false;
+    setCamera("pending");
     (async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 } }, audio: false });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } }, audio: false });
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
         if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play(); }
         setCamera("on");
+        // labels and counts are only reliable after permission was granted, so check now
+        const inputs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === "videoinput");
+        setCanFlip(inputs.length > 1);
       } catch {
-        setCamera("off");
+        if (!cancelled) setCamera("off");
       }
     })();
-    return () => { stream?.getTracks().forEach((t) => t.stop()); };
-  }, []);
+    return () => { cancelled = true; stream?.getTracks().forEach((t) => t.stop()); };
+  }, [facing]);
 
   useEffect(() => { refreshStatus(); getSamples().then(setSamples).catch(() => setSamples([])); }, [refreshStatus]);
 
@@ -281,7 +290,7 @@ export default function Studio() {
           <div className="card brackets relative aspect-[4/3] overflow-hidden bg-[#0a0e13]">
             <span className="br" />
             {busy && <span className="scanline animate-scan" aria-hidden />}
-            <video ref={videoRef} playsInline muted className={cn("h-full w-full object-cover", (camera !== "on" || uploaded || sample) && "hidden")} />
+            <video ref={videoRef} playsInline muted className={cn("h-full w-full object-cover", facing === "user" && "-scale-x-100", (camera !== "on" || uploaded || sample) && "hidden")} />
             {uploaded && !sample && <img src={uploaded.url} alt="Uploaded photo" className="h-full w-full object-contain" />}
             {sample && <img src={samples.find((s) => s.name === sample)?.image} alt={`Sample: ${sample}`} className="h-full w-full object-contain" />}
             {camera !== "on" && !uploaded && !sample && (
@@ -311,6 +320,16 @@ export default function Studio() {
                 onClick={() => { setUploaded(null); setSample(null); }}
               >
                 <Camera className="h-4 w-4" /> Back to camera
+              </button>
+            )}
+            {camera === "on" && canFlip && !uploaded && !sample && (
+              <button
+                className="absolute bottom-4 right-4 z-10 btn btn-ghost bg-ink/85 min-h-[44px] px-4 py-2 text-sm"
+                onClick={() => setFacing((f) => (f === "environment" ? "user" : "environment"))}
+                disabled={busy}
+                aria-label={facing === "environment" ? "Switch to the front camera" : "Switch to the back camera"}
+              >
+                <SwitchCamera className="h-5 w-5" /> {facing === "environment" ? "Selfie" : "Back"}
               </button>
             )}
           </div>
@@ -364,7 +383,7 @@ export default function Studio() {
           </div>
 
           <details className="card p-6" open={history.length > 0}>
-            <summary className="cursor-pointer font-display text-xl font-bold">Recent descriptions</summary>
+            <summary className="cursor-pointer py-2 font-display text-xl font-bold">Recent descriptions</summary>
             <ol className="mt-4 space-y-3">
               {history.length === 0 && <li className="text-muted">Nothing yet.</li>}
               {history.map((h, i) => (

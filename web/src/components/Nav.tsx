@@ -39,7 +39,7 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ink/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <Link to="/" aria-label="Sightline home">
+        <Link to="/" aria-label="Sightline home" className="inline-flex min-h-[44px] items-center">
           <Logo />
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-7 md:flex">
@@ -62,7 +62,7 @@ export default function Nav() {
           </Link>
           <button
             type="button"
-            className="btn btn-ghost h-11 w-11 p-0 md:hidden"
+            className="btn btn-ghost h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 p-0 md:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
