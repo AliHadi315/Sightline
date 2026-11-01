@@ -161,6 +161,10 @@ Open <http://127.0.0.1:7860>. Expected:
 4. Press `esc` while it speaks: audio stops. **Play again** replays it.
 5. Click the sign sample, then **Read the text**: the saved text is read; the note says
    `No API call made`. This works with or without a key.
+5b. On a phone (or any device with two cameras) a **Selfie** button sits at the bottom right of the
+   viewfinder: it switches to the front camera, mirrored like a mirror, and turns into **Back**.
+   The frame sent to the model is not mirrored, so text still reads correctly. On a laptop with one
+   camera the button does not appear.
 6. Deny or lack a camera: the viewfinder says "No camera. Upload a photo or pick a sample." and
    **Upload a photo instead** works with any JPEG.
 7. <http://127.0.0.1:7860/api/docs> shows the API reference; an unknown path such as `/anything` falls back to the site.
