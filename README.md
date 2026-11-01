@@ -28,7 +28,7 @@ Created by **Ali Hadi Meselmani**
 <br/>
 
 <a href="https://sightline-rho-khaki.vercel.app/app">
-  <img src="docs/screenshot-app.png" alt="The Sightline app page: a notice that the page uses your camera and nothing is saved, the field for your own Gemini key showing Key accepted, a live status strip, a viewfinder with corner brackets showing a sample sign, the sign's text read back in large type, and the Describe the scene and Read the text buttons." width="100%">
+  <img src="docs/screenshot-app.png" alt="The Sightline app page: a notice that the page uses your camera and nothing is saved, the key field showing Key accepted, a live status strip, the live camera view of a desk inside corner brackets with a Selfie button to flip the camera, the scene described in large type with object tags, and the Describe the scene and Read the text buttons." width="100%">
 </a>
 
 </div>
@@ -45,7 +45,7 @@ language, with directions like *"to your left"* and *"in front of you"*.
 |---|---|
 | ![Landing page: Point. Press. Hear. beside a viewfinder showing a real desk photo with detection boxes](docs/landing.png) | ![Capabilities grid: scene detection, read mode, only what changed, manual capture, no guessing about people, free-tier limits](docs/capabilities.png) |
 | ![About page with what it is, how a description happens, privacy rules, limits and the speech chain](docs/about.png) | ![Privacy page listing the three non-negotiable rules and the formal policy](docs/privacy.png) |
-| ![App page on a phone: sample in the viewfinder, result in large type, sticky Describe and Read bar at the bottom](docs/app-phone.png) | ![Desktop app window: live frame with FPS and state overlay, the full description in a panel underneath](docs/desktop-app.png) |
+| ![App page on a phone: live camera view with the Selfie flip button, the description in large type, and the sticky Describe and Read bar at the bottom](docs/app-phone.png) | ![Desktop app window: live frame with FPS and state overlay, the full description in a panel underneath](docs/desktop-app.png) |
 
 The desktop window is rendered by the app's own drawing code from a sample frame, so it shows exactly what the camera window looks like without exposing a real camera feed.
 
